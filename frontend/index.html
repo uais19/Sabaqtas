@@ -3,12 +3,241 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sabaqtas</title>
+  <title>Sabaqtas — поймём, где ты застрял</title>
   <link rel="stylesheet" href="css/style.css">
-  <!-- mock.js подключается первым: api.js использует объект MOCK -->
-  <script src="js/mock.js" defer></script>
-  <script src="js/api.js" defer></script>
+  <!-- nav.js подсвечивает ссылку на ту секцию, которую сейчас видно.
+       menu.js открывает и закрывает мобильное меню.
+       Это все скрипты лендинга: mock.js и api.js подключаются
+       на тех экранах, где реально нужны данные. -->
+  <script src="js/nav.js" defer></script>
+  <script src="js/menu.js" defer></script>
 </head>
-<body>
+<body id="top">
+
+  <!-- ШАПКА: липкая, всегда видна при прокрутке -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <!-- Кнопка-бургер видна только на узком экране.
+           В разметке она идёт перед логотипом, а вправо её ставит CSS (order).
+           aria-expanded переключает menu.js: true — меню открыто. -->
+      <button class="burger" type="button" aria-label="Меню" aria-expanded="false" aria-controls="mobile-menu">
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+      </button>
+
+      <a class="wordmark" href="#top">Sabaqtas</a>
+
+      <!-- data-nav хранит id секции. По нему nav.js находит ссылку
+           и подсвечивает её — сразу и здесь, и в мобильном меню. -->
+      <nav class="header-nav">
+        <a class="nav-link" data-nav="problem" href="#problem">Проблема</a>
+        <a class="nav-link" data-nav="solution" href="#solution">Решение</a>
+        <a class="nav-link" data-nav="example" href="#example">Пример</a>
+        <a class="nav-link" data-nav="how" href="#how">Как это работает</a>
+        <a class="nav-link" data-nav="teachers" href="#teachers">Учителям</a>
+      </nav>
+
+      <a class="header-link" href="teacher.html">Войти как учитель</a>
+    </div>
+  </header>
+
+  <!-- Затемнение позади выезжающей панели -->
+  <div class="menu-overlay"></div>
+
+  <!-- Мобильное меню: выезжает слева -->
+  <nav class="menu-panel" id="mobile-menu" aria-label="Мобильное меню">
+    <a class="menu-link" data-nav="problem" href="#problem">Проблема</a>
+    <a class="menu-link" data-nav="solution" href="#solution">Решение</a>
+    <a class="menu-link" data-nav="example" href="#example">Пример</a>
+    <a class="menu-link" data-nav="how" href="#how">Как это работает</a>
+    <a class="menu-link" data-nav="teachers" href="#teachers">Учителям</a>
+
+    <hr class="menu-divider">
+
+    <a class="menu-link" href="teacher.html">Войти как учитель</a>
+  </nav>
+
+  <main>
+
+    <!-- ГЛАВНЫЙ ЭКРАН -->
+    <section class="hero bg-1">
+      <div class="container hero-inner">
+        <h1>Поймём, где ты застрял</h1>
+        <p class="hero-subtitle">
+          Задача не решается? Обычно дело в теме, которую проходили раньше.
+          Sabaqtas найдёт её и поможет разобраться.
+        </p>
+        <a class="button button-primary hero-button" href="diagnostic.html">Начать обучение</a>
+      </div>
+    </section>
+
+    <!-- ПРОБЛЕМА -->
+    <section class="section bg-2" id="problem">
+      <div class="container">
+        <h2 class="section-title">Проблема</h2>
+        <div class="cards cards-3">
+
+          <article class="card">
+            <h3 class="card-title">Не у всех есть репетитор</h3>
+            <p class="card-text">В селе трудно найти того, кто объяснит после уроков.</p>
+          </article>
+
+          <article class="card">
+            <h3 class="card-title">Учитель один на всех</h3>
+            <!-- TODO: вставить реальную цифру со ссылкой на источник -->
+            <p class="card-text">В классе __ учеников. Проверить каждого просто некогда.</p>
+          </article>
+
+          <article class="card">
+            <h3 class="card-title">ИИ решает вместо ученика</h3>
+            <p class="card-text">Поэтому во многих школах его запрещают.</p>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- РЕШЕНИЕ -->
+    <section class="section bg-3" id="solution">
+      <div class="container">
+        <h2 class="section-title">Решение</h2>
+        <p class="solution-text">
+          Sabaqtas находит тему, которую ученик не понял, и ведёт его к ответу
+          подсказками. Всё объяснение берётся из школьного учебника.
+        </p>
+      </div>
+    </section>
+
+    <!-- ПРИМЕР — тёмная секция-прожектор, главный визуальный блок страницы.
+         Лесенка показывает, как система спускается от темы 9 класса
+         вниз до той темы, где на самом деле пробел. -->
+    <section class="section spotlight" id="example">
+      <div class="container">
+        <h2 class="section-title">Пример</h2>
+        <p class="example-intro">
+          Ученик 9 класса не решает квадратные уравнения.
+          Вот что находит Sabaqtas:
+        </p>
+
+        <ol class="stairs">
+
+          <li class="stair">
+            <span class="stair-topic">Квадратные уравнения</span>
+            <span class="stair-grade">9 класс</span>
+            <span class="stair-status">✕ не получилось</span>
+          </li>
+
+          <li class="stair">
+            <span class="stair-topic">Формулы сокращённого умножения</span>
+            <span class="stair-grade">7 класс</span>
+            <span class="stair-status">✕ не получилось</span>
+          </li>
+
+          <li class="stair stair-gap">
+            <span class="stair-topic">Действия с дробями</span>
+            <span class="stair-grade">6 класс</span>
+            <span class="stair-status">← здесь пробел</span>
+          </li>
+
+          <li class="stair">
+            <span class="stair-topic">Умножение и деление</span>
+            <span class="stair-grade">5 класс</span>
+            <span class="stair-status">✓ понятно</span>
+          </li>
+
+        </ol>
+
+        <p class="example-note">
+          Начинаем не с квадратных уравнений, а с дробей за 6 класс.
+        </p>
+      </div>
+    </section>
+
+    <!-- КАК ЭТО РАБОТАЕТ -->
+    <section class="section bg-1" id="how">
+      <div class="container">
+        <h2 class="section-title">Как это работает</h2>
+        <ol class="steps">
+
+          <li class="step">
+            <span class="step-number">1</span>
+            <p class="step-text">Отвечаешь на несколько вопросов</p>
+          </li>
+
+          <li class="step">
+            <span class="step-number">2</span>
+            <p class="step-text">Находим тему, которую ты не понял — даже если её проходили давно</p>
+          </li>
+
+          <li class="step">
+            <span class="step-number">3</span>
+            <p class="step-text">Составляем план и начинаем с неё</p>
+          </li>
+
+          <li class="step">
+            <span class="step-number">4</span>
+            <p class="step-text">Помогаем решить самому, подсказками, без готового ответа</p>
+          </li>
+
+        </ol>
+      </div>
+    </section>
+
+    <!-- ЧЕМ МЫ ОТЛИЧАЕМСЯ -->
+    <section class="section bg-2" id="different">
+      <div class="container">
+        <h2 class="section-title">Чем мы отличаемся</h2>
+        <div class="cards cards-3">
+
+          <article class="card card-strong">
+            <h3 class="card-title">Пробел из прошлых классов</h3>
+            <p class="card-text">
+              Ты не решаешь задачу за 9 класс, потому что не понял тему за 6-й.
+              Мы находим эту тему.
+            </p>
+          </article>
+
+          <article class="card card-strong">
+            <h3 class="card-title">Режим наставника</h3>
+            <p class="card-text">
+              ИИ не даёт готовый ответ. Он задаёт вопросы и помогает дойти
+              до решения самому. Поэтому его можно разрешить в школе.
+            </p>
+          </article>
+
+          <article class="card card-strong">
+            <h3 class="card-title">Только из учебника</h3>
+            <p class="card-text">
+              Каждый ответ со ссылкой на параграф и страницу.
+              Чего нет в учебнике, ИИ не придумает.
+              Отвечает на русском и на казахском.
+            </p>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ДЛЯ УЧИТЕЛЕЙ -->
+    <section class="section bg-3" id="teachers">
+      <div class="container teachers">
+        <h2 class="section-title">Учителям</h2>
+        <p class="teachers-text">
+          Видно, кто где застрял и кому нужна помощь. Проверять тетради не нужно.
+        </p>
+        <a class="button button-primary" href="teacher.html">Панель учителя</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ПОДВАЛ -->
+  <footer class="site-footer bg-4">
+    <div class="container">
+      <p>Sabaqtas · Future Minds Hackathon 2026 · трек Social Impact</p>
+    </div>
+  </footer>
+
 </body>
 </html>

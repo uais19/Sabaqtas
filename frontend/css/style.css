@@ -1,0 +1,697 @@
+/* ============================================================
+   Sabaqtas — общие стили
+   Дизайн-система: светлая тема, много воздуха, крупный текст.
+   Шрифты только системные — страница должна открываться быстро
+   на медленном сельском интернете.
+   ============================================================ */
+
+/* --- Переменные дизайн-системы --- */
+:root {
+  --bg: #FFFFFF;          /* основной фон */
+  --surface: #F5F7FA;     /* фон блоков и карточек */
+  --border: #E3E8EF;      /* рамки */
+  --text: #1A1D23;        /* основной текст */
+  --muted: #5B6472;       /* второстепенный текст */
+  --accent: #00A3C4;      /* кнопки, ссылки, акценты */
+  --accent-dark: #007D97; /* наведение мыши */
+  --gold: #F5B301;        /* достижения, выделенный шаг */
+
+  /* Шкала фонов секций: сверху вниз страница постепенно «остывает»
+     от белого к холодному голубому. Резких полос больше нет. */
+  --bg-1: #FFFFFF;
+  --bg-2: #F7FAFB;
+  --bg-3: #EFF5F7;
+  --bg-4: #E7F1F4;
+
+  /* Тёмная секция-прожектор: на ней лежит главный пример страницы */
+  --spotlight: #0A3D4A;       /* фон */
+  --spotlight-text: #EAF6F9;  /* основной текст на тёмном */
+  --spotlight-muted: #9FC4CE; /* второстепенный текст на тёмном */
+}
+
+/* Плавная прокрутка при переходе по якорным ссылкам в шапке */
+html {
+  scroll-behavior: smooth;
+}
+
+/* --- Базовый сброс --- */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-1);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+h1, h2, h3, p, ol {
+  margin: 0;
+}
+
+a {
+  color: var(--accent);
+}
+
+a:hover {
+  color: var(--accent-dark);
+}
+
+/* Общая обёртка: ограничивает ширину контента и центрирует его */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+/* ============================================================
+   Шапка
+   ============================================================ */
+
+.site-header {
+  /* position: sticky — шапка прокручивается вместе со страницей,
+     но останавливается у верхнего края и дальше остаётся на месте */
+  position: sticky;
+  top: 0;
+  /* z-index нужен, чтобы шапка была поверх секций, а не под ними */
+  z-index: 10;
+  background-color: var(--bg-1);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Три части шапки: логотип слева, навигация по центру, вход справа */
+.header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.header-nav {
+  display: flex;
+  gap: 24px;
+}
+
+.nav-link {
+  /* position: relative нужен для полоски .nav-link.active::after */
+  position: relative;
+  color: var(--muted);
+  font-size: 16px;
+  text-decoration: none;
+  padding-bottom: 6px;
+}
+
+.nav-link:hover {
+  color: var(--accent-dark);
+}
+
+/* Активную ссылку ставит nav.js — ту, чья секция сейчас на экране */
+.nav-link.active {
+  color: var(--accent);
+}
+
+/* Полоска под активной ссылкой */
+.nav-link.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background-color: var(--accent);
+}
+
+.wordmark {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.header-link {
+  font-size: 17px;
+  text-decoration: none;
+}
+
+.header-link:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================
+   Мобильное меню: кнопка-бургер и выезжающая панель
+   Всё состояние — класс .menu-open на <body>, его ставит menu.js.
+   ============================================================ */
+
+/* Кнопка-бургер. На десктопе её нет, показываем только на узком экране. */
+.burger {
+  display: none;
+  /* order: 2 — в разметке кнопка стоит перед логотипом,
+     а показать её надо справа */
+  order: 2;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 48px;
+  height: 48px;
+  padding: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Три полоски значка. Никаких картинок и иконочных шрифтов. */
+.burger-line {
+  display: block;
+  width: 100%;
+  height: 3px;
+  border-radius: 2px;
+  background-color: var(--text);
+  transition: transform 0.25s, opacity 0.25s;
+}
+
+/* Открытое меню: полоски складываются в крестик.
+   Крайние съезжаются к центру (9px) и поворачиваются,
+   средняя просто исчезает. */
+body.menu-open .burger-line:nth-child(1) {
+  transform: translateY(9px) rotate(45deg);
+}
+
+body.menu-open .burger-line:nth-child(2) {
+  opacity: 0;
+}
+
+body.menu-open .burger-line:nth-child(3) {
+  transform: translateY(-9px) rotate(-45deg);
+}
+
+/* Пока меню открыто, страница под ним не прокручивается */
+body.menu-open {
+  overflow: hidden;
+}
+
+/* Затемнение позади панели */
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 20;
+  background-color: rgba(26, 29, 35, 0.5);
+  opacity: 0;
+  /* visibility прячет затемнение от кликов, пока меню закрыто */
+  visibility: hidden;
+  transition: opacity 0.25s, visibility 0.25s;
+}
+
+body.menu-open .menu-overlay {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Сама панель: во всю высоту экрана, выезжает слева */
+.menu-panel {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 21;
+  width: 80%;
+  max-width: 320px;
+  padding: 16px;
+  overflow-y: auto;
+  background-color: var(--bg-1);
+  border-right: 1px solid var(--border);
+  /* Панель всегда на месте, просто сдвинута за левый край экрана.
+     Анимируем только transform: браузеру не приходится заново считать
+     разметку, поэтому меню плавно открывается и на слабом телефоне. */
+  transform: translateX(-100%);
+  transition: transform 0.25s;
+}
+
+body.menu-open .menu-panel {
+  transform: translateX(0);
+}
+
+/* Ссылки в панели: высота не меньше 48px, чтобы удобно попадать пальцем */
+.menu-link {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 18px;
+  text-decoration: none;
+}
+
+.menu-link:hover {
+  background-color: var(--bg-2);
+  color: var(--accent-dark);
+}
+
+/* Активную ссылку ставит nav.js — та же логика, что и в верхнем меню */
+.menu-link.active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.menu-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 12px 0;
+}
+
+/* ============================================================
+   Главный экран (hero)
+   ============================================================ */
+
+.hero-inner {
+  padding-top: 80px;
+  padding-bottom: 80px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 46px;
+  line-height: 1.2;
+  /* Заголовок не должен растягиваться на всю ширину — так его легче читать */
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero-subtitle {
+  font-size: 21px;
+  color: var(--muted);
+  max-width: 700px;
+  margin: 24px auto 0;
+}
+
+.hero-button {
+  margin-top: 40px;
+}
+
+/* ============================================================
+   Кнопки
+   ============================================================ */
+
+.button {
+  display: inline-block;
+  padding: 16px 32px;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.button-primary {
+  background-color: var(--accent);
+  color: #FFFFFF;
+  border: 2px solid var(--accent);
+}
+
+.button-primary:hover {
+  background-color: var(--accent-dark);
+  border-color: var(--accent-dark);
+  color: #FFFFFF;
+}
+
+.button-secondary {
+  background-color: var(--bg);
+  color: var(--accent);
+  border: 2px solid var(--border);
+}
+
+.button-secondary:hover {
+  border-color: var(--accent);
+  color: var(--accent-dark);
+}
+
+/* ============================================================
+   Секции
+   ============================================================ */
+
+.section {
+  padding-top: 72px;
+  padding-bottom: 72px;
+  /* scroll-margin-top равен высоте липкой шапки: иначе при переходе
+     по якорной ссылке заголовок секции прячется под шапкой */
+  scroll-margin-top: 72px;
+}
+
+/* Фон секции. Класс проставлен в HTML сверху вниз: bg-1 -> bg-4 */
+.bg-1 { background-color: var(--bg-1); }
+.bg-2 { background-color: var(--bg-2); }
+.bg-3 { background-color: var(--bg-3); }
+.bg-4 { background-color: var(--bg-4); }
+
+/* Текст секции «Решение» */
+.solution-text {
+  font-size: 20px;
+  color: var(--muted);
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.section-title {
+  font-size: 32px;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+/* ============================================================
+   Пример: лесенка тем
+   Каждая следующая строка сдвинута вправо, поэтому видно,
+   что система спускается от темы 9 класса к теме 5 класса.
+   ============================================================ */
+
+.example-intro {
+  font-size: 20px;
+  color: var(--muted);
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto 32px;
+}
+
+.stairs {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 18px;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.stair {
+  /* position: relative нужен для соединительной линии .stair + .stair::before */
+  position: relative;
+  display: grid;
+  /* тема тянется, класс и статус занимают столько, сколько нужно тексту */
+  grid-template-columns: 1fr auto auto;
+  gap: 20px;
+  align-items: center;
+  background-color: var(--bg-1);
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 22px;
+}
+
+/* Сдвиг вправо: каждая следующая тема на класс ниже предыдущей */
+.stair:nth-child(2) { margin-left: 40px; }
+.stair:nth-child(3) { margin-left: 80px; }
+.stair:nth-child(4) { margin-left: 120px; }
+
+/* Короткая вертикальная линия в промежутке между строками:
+   она связывает строки в одну цепочку. Высота линии равна gap списка. */
+.stair + .stair::before {
+  content: "";
+  position: absolute;
+  left: 24px;
+  top: -18px;
+  width: 2px;
+  height: 18px;
+  background-color: var(--border);
+}
+
+.stair-topic {
+  font-weight: 600;
+}
+
+.stair-grade,
+.stair-status {
+  color: var(--muted);
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+/* Строка с найденным пробелом — её нужно заметить первой */
+.stair-gap {
+  border-left-color: var(--gold);
+  background-color: #FEF7E6; /* сильно осветлённый --gold */
+}
+
+.stair-gap .stair-status {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.example-note {
+  text-align: center;
+  color: var(--muted);
+  font-size: 16px;
+  margin-top: 28px;
+}
+
+/* ============================================================
+   Тёмная секция-прожектор (#example)
+   На светлой странице один тёмный блок — на него смотрят в первую очередь.
+   Здесь меняются только цвета, разметка лесенки остаётся прежней.
+   ============================================================ */
+
+.spotlight {
+  background-color: var(--spotlight);
+  color: var(--spotlight-text);
+}
+
+.spotlight .example-intro,
+.spotlight .example-note {
+  color: var(--spotlight-muted);
+}
+
+/* Строки лесенки — чуть светлее фона секции, поэтому видно каждую строку */
+.spotlight .stair {
+  background-color: #0F4E5E; /* --spotlight, немного светлее */
+  border-color: #1B6274;     /* рамка ещё светлее строки */
+  color: var(--spotlight-text);
+}
+
+.spotlight .stair-grade,
+.spotlight .stair-status {
+  color: var(--spotlight-muted);
+}
+
+/* Соединительная линия между строками */
+.spotlight .stair + .stair::before {
+  background-color: #1B6274;
+}
+
+/* Найденный пробел: золотая рамка слева, золотой текст и тёплая подложка.
+   rgba здесь удобнее сплошного цвета — золото просвечивает сквозь тёмный фон.
+   Правило идёт после .spotlight .stair, иначе общая рамка перекрыла бы золотую. */
+.spotlight .stair-gap {
+  border-left-color: var(--gold);
+  background-color: rgba(245, 179, 1, 0.14);
+}
+
+.spotlight .stair-gap .stair-topic,
+.spotlight .stair-gap .stair-status {
+  color: var(--gold);
+}
+
+/* ============================================================
+   Карточки
+   ============================================================ */
+
+.cards {
+  display: grid;
+  gap: 24px;
+  /* align-items: start — карточка занимает столько высоты, сколько нужно
+     её тексту. Без этого grid растягивает все карточки по самой длинной
+     и внизу коротких остаётся пустое место. */
+  align-items: start;
+}
+
+/* На широком экране — три колонки одинаковой ширины */
+.cards-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.card {
+  background-color: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px;
+}
+
+.card-title {
+  font-size: 21px;
+  margin-bottom: 12px;
+}
+
+.card-text {
+  color: var(--muted);
+}
+
+/* Карточки блока «Чем мы отличаемся» — самый заметный блок страницы:
+   белый фон, золотая полоса сверху и тень. */
+.card-strong {
+  background-color: var(--bg-1);
+  border-top: 5px solid var(--gold);
+  padding: 32px;
+  box-shadow: 0 4px 16px rgba(26, 29, 35, 0.08);
+}
+
+.card-strong .card-title {
+  font-size: 24px;
+}
+
+.card-strong .card-text {
+  color: var(--text);
+}
+
+/* ============================================================
+   Шаги «Как это работает»
+   ============================================================ */
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  list-style: none;
+  padding: 0;
+}
+
+.step {
+  text-align: center;
+}
+
+/* Круг с номером шага */
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background-color: var(--accent);
+  color: #FFFFFF;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.step-text {
+  color: var(--muted);
+}
+
+/* ============================================================
+   Блок для учителей
+   ============================================================ */
+
+.teachers {
+  text-align: center;
+}
+
+.teachers-text {
+  font-size: 20px;
+  color: var(--muted);
+  max-width: 640px;
+  margin: 0 auto 32px;
+}
+
+/* ============================================================
+   Подвал
+   ============================================================ */
+
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding-top: 32px;
+  padding-bottom: 32px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+/* На широком экране мобильного меню не существует */
+@media (min-width: 801px) {
+
+  .menu-overlay,
+  .menu-panel {
+    display: none;
+  }
+
+  /* Страховка: если окно растянули с открытым меню,
+     прокрутка страницы должна вернуться */
+  body.menu-open {
+    overflow: visible;
+  }
+
+}
+
+/* ============================================================
+   Мобильная версия: всё в одну колонку, текст чуть меньше
+   ============================================================ */
+
+@media (max-width: 800px) {
+
+  /* На узком экране верхние ссылки не помещаются — их заменяет бургер.
+     Ссылка «Войти как учитель» никуда не пропадает: она внутри панели. */
+  .header-nav,
+  .header-link {
+    display: none;
+  }
+
+  .burger {
+    display: flex;
+  }
+
+  .solution-text {
+    font-size: 18px;
+  }
+
+  .cards-3,
+  .steps {
+    grid-template-columns: 1fr;
+  }
+
+  h1 {
+    font-size: 34px;
+  }
+
+  .hero-subtitle {
+    font-size: 19px;
+  }
+
+  .hero-inner {
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+
+  .section {
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+
+  .section-title {
+    font-size: 27px;
+  }
+
+  /* Кнопка на телефоне занимает всю ширину — так удобнее нажимать */
+  .hero-button {
+    display: block;
+    width: 100%;
+  }
+
+  .example-intro {
+    font-size: 18px;
+  }
+
+  /* Лесенка: строка складывается в одну колонку,
+     а сдвиг вправо делаем меньше, чтобы хватило ширины экрана */
+  .stair {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .stair:nth-child(2) { margin-left: 12px; }
+  .stair:nth-child(3) { margin-left: 24px; }
+  .stair:nth-child(4) { margin-left: 36px; }
+
+}
