@@ -15,6 +15,7 @@ const questionText = document.getElementById("question-text");
 const answersBox = document.getElementById("answers");
 const chainTitle = document.getElementById("chain-title");
 const chainBox = document.getElementById("chain");
+const resultTitle = document.querySelector("#state-result .page-title");
 const resultChainBox = document.getElementById("result-chain");
 const resultText = document.getElementById("result-text");
 const resultSource = document.getElementById("result-source");
@@ -128,21 +129,38 @@ function showResult(result) {
   stateQuestion.classList.add("is-hidden");
   stateResult.classList.remove("is-hidden");
 
+  const root = result.root_topic;
+
   // Полная цепочка тем приходит с бэкенда — рисуем её заново,
   // выделяя ту тему, которая оказалась корневым пробелом.
   resultChainBox.textContent = "";
   result.path.forEach((topic) => {
-    const isRoot = topic.topic_id === result.root_topic.id;
+    // Если пробела нет, root равен null и выделять нечего.
+    const isRoot = root !== null && topic.topic_id === root.id;
     resultChainBox.append(createStairRow(topic, isRoot));
   });
 
+  // Редкий случай: ученик сразу ответил верно, спускаться было некуда.
+  if (root === null) {
+    resultTitle.textContent = "Пробелов не нашли";
+    resultText.textContent = "Ты уверенно держишь тему за свой класс. Начнём с текущей программы.";
+    resultSource.textContent = "";
+    return;
+  }
+
   // Текст собираем из данных, а не пишем названия тем руками:
   // при другом пробеле страница должна говорить правду.
+  resultTitle.textContent = "Нашли, где ты застрял";
   const firstTopic = result.path[0];
-  const root = result.root_topic;
-  resultText.textContent =
-    'Начинаем не с темы "' + firstTopic.title + '", а с темы "' + root.title +
-    '" за ' + root.grade + ' класс. Пока не закроем её, остальное решать бесполезно.';
+  const tail = ' за ' + root.grade + ' класс. Пока не закроем её, остальное решать бесполезно.';
+
+  if (root.id === firstTopic.topic_id) {
+    // Пробел оказался на самой первой теме — противопоставлять нечему.
+    resultText.textContent = 'Начинаем с темы "' + root.title + '"' + tail;
+  } else {
+    resultText.textContent =
+      'Начинаем не с темы "' + firstTopic.title + '", а с темы "' + root.title + '"' + tail;
+  }
   resultSource.textContent = "источник — " + root.source_ref;
 }
 
