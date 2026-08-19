@@ -23,6 +23,13 @@
   --bg-3: #EFF5F7;
   --bg-4: #E7F1F4;
 
+  /* Ответ верный / неверный. Заливка светлая, поэтому основной текст
+     на ней остаётся чёрным и читается. */
+  --correct: #1E8E5A;
+  --correct-bg: #E8F6EF;
+  --wrong: #C7382D;
+  --wrong-bg: #FBEBE9;
+
   /* Тёмная секция-прожектор: на ней лежит главный пример страницы */
   --spotlight: #0A3D4A;       /* фон */
   --spotlight-text: #EAF6F9;  /* основной текст на тёмном */
@@ -143,6 +150,259 @@ a:hover {
   text-decoration: underline;
 }
 
+
+/* ============================================================
+   Движение на лендинге
+   Всё анимируемое лежит внутри @media (prefers-reduced-motion: no-preference).
+   Если человек попросил систему уменьшить анимацию, ни одно правило отсюда
+   не применяется: он сразу видит готовую страницу без движения.
+
+   Анимируем только opacity и transform. Их браузер считает отдельно и не
+   пересчитывает разметку всей страницы на каждом кадре, поэтому даже на
+   слабом телефоне нет рывков. Height, width, top и margin не трогаем.
+   ============================================================ */
+
+/* Слово в заголовке, которое меняется: математике -> физике -> химии.
+   inline-block и min-width держат ширину, поэтому строка не прыгает
+   при смене слова. Эти правила нужны всегда, движения в них нет. */
+#rotator {
+  display: inline-block;
+  /* Ширины хватает на самое длинное слово — «математике».
+     Замерено: при шрифте 46px оно занимает 266px, то есть 5.8em.
+     Берём 6em с запасом. em, а не px: на телефоне заголовок меньше,
+     и запас уменьшается вместе с ним. */
+  min-width: 6em;
+  text-align: center;
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+  /* --- Появление при прокрутке --- */
+
+  /* Класс js-reveal ставит скрипт в <head> до первой отрисовки.
+     Без него (JavaScript выключен или сломался) это правило не сработает
+     и весь контент останется видимым. */
+  html.js-reveal .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  /* Класс is-visible добавляет reveal.js, когда элемент дошёл до экрана.
+     Задержку для каждого элемента внутри группы тоже ставит reveal.js. */
+  html.js-reveal .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.45s ease-out, transform 0.45s ease-out;
+  }
+
+  /* --- Смена слова в заголовке --- */
+
+  #rotator {
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  }
+
+  /* Класс is-hiding ставит rotator.js на время подмены слова */
+  #rotator.is-hiding {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+}
+
+/* ============================================================
+   Экран диагностики (diagnostic.html)
+   Лесенку, кнопки и карточки берём с лендинга, добавляем только то,
+   чего там не было: вопрос, варианты ответа и итоговую карточку.
+   ============================================================ */
+
+/* Утилита: спрятать одно из двух состояний страницы */
+.is-hidden {
+  display: none;
+}
+
+/* Колонка уже, чем на лендинге: читать вопрос так удобнее */
+.page-narrow {
+  max-width: 720px;
+  padding-top: 48px;
+  padding-bottom: 64px;
+}
+
+.page-title {
+  font-size: 34px;
+  text-align: center;
+}
+
+.page-subtitle {
+  font-size: 18px;
+  color: var(--muted);
+  text-align: center;
+  max-width: 560px;
+  margin: 16px auto 0;
+}
+
+/* --- Карточка с вопросом --- */
+
+.question-card {
+  background-color: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 32px;
+  margin-top: 32px;
+  box-shadow: 0 4px 16px rgba(26, 29, 35, 0.06);
+}
+
+/* Тема и класс над вопросом */
+.question-topic {
+  font-size: 16px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.question-text {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 24px;
+}
+
+.answers {
+  display: grid;
+  gap: 12px;
+}
+
+/* Вариант ответа — кнопка во всю ширину карточки */
+.answer {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  padding: 14px 20px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  background-color: var(--bg-1);
+  color: var(--text);
+  /* кнопки не наследуют шрифт страницы автоматически — задаём явно */
+  font-family: inherit;
+  font-size: 18px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.answer:hover {
+  border-color: var(--accent);
+}
+
+/* «Не знаю» — такой же по размеру, но заметно тише остальных */
+.answer-dontknow {
+  color: var(--muted);
+  border-style: dashed;
+}
+
+/* Подсветка после ответа. Её ставит diagnostic.js примерно на 600 мс. */
+.answer.is-correct {
+  background-color: var(--correct-bg);
+  border-color: var(--correct);
+}
+
+.answer.is-wrong {
+  background-color: var(--wrong-bg);
+  border-color: var(--wrong);
+}
+
+/* --- Лесенка под вопросом --- */
+
+.chain-title {
+  font-size: 16px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 48px;
+  margin-bottom: 20px;
+}
+
+/* Короткое появление новой строки лесенки */
+@keyframes stair-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stair-appear {
+  animation: stair-appear 0.3s ease-out;
+}
+
+/* --- Итог диагностики --- */
+
+/* В итоговой лесенке строку с пробелом делаем крупнее остальных */
+.stairs-result {
+  margin-top: 32px;
+}
+
+.stairs-result .stair-gap .stair-topic {
+  font-size: 21px;
+}
+
+.stairs-result .stair-gap .stair-status {
+  font-size: 18px;
+}
+
+.result-card {
+  background-color: var(--bg-1);
+  border: 1px solid var(--border);
+  border-top: 5px solid var(--gold);
+  border-radius: 14px;
+  padding: 28px;
+  margin-top: 32px;
+}
+
+.result-text {
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+.result-source {
+  font-size: 16px;
+  color: var(--muted);
+  margin-top: 16px;
+}
+
+.result-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 32px;
+}
+
+/* Ссылка-кнопка «Пройти заново»: это <button>, но выглядит как ссылка */
+.link-button {
+  background: none;
+  border: none;
+  padding: 8px;
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 18px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link-button:hover {
+  color: var(--accent-dark);
+}
+
+.error-message {
+  margin-top: 32px;
+  padding: 20px;
+  border: 1px solid var(--wrong);
+  border-radius: 10px;
+  background-color: var(--wrong-bg);
+  text-align: center;
+}
+
 /* ============================================================
    Мобильное меню: кнопка-бургер и выезжающая панель
    Всё состояние — класс .menu-open на <body>, его ставит menu.js.
@@ -171,7 +431,12 @@ a:hover {
   height: 3px;
   border-radius: 2px;
   background-color: var(--text);
-  transition: transform 0.25s, opacity 0.25s;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .burger-line {
+    transition: transform 0.25s, opacity 0.25s;
+  }
 }
 
 /* Открытое меню: полоски складываются в крестик.
@@ -206,7 +471,12 @@ body.menu-open {
   opacity: 0;
   /* visibility прячет затемнение от кликов, пока меню закрыто */
   visibility: hidden;
-  transition: opacity 0.25s, visibility 0.25s;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .menu-overlay {
+    transition: opacity 0.25s, visibility 0.25s;
+  }
 }
 
 body.menu-open .menu-overlay {
@@ -231,7 +501,12 @@ body.menu-open .menu-overlay {
      Анимируем только transform: браузеру не приходится заново считать
      разметку, поэтому меню плавно открывается и на слабом телефоне. */
   transform: translateX(-100%);
-  transition: transform 0.25s;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .menu-panel {
+    transition: transform 0.25s;
+  }
 }
 
 body.menu-open .menu-panel {
@@ -693,5 +968,34 @@ h1 {
   .stair:nth-child(2) { margin-left: 12px; }
   .stair:nth-child(3) { margin-left: 24px; }
   .stair:nth-child(4) { margin-left: 36px; }
+
+  /* Экран диагностики на телефоне */
+  .page-narrow {
+    padding-top: 32px;
+  }
+
+  .page-title {
+    font-size: 28px;
+  }
+
+  .question-card {
+    padding: 20px;
+  }
+
+  .question-text {
+    font-size: 20px;
+  }
+
+  /* Кнопки итога встают друг под другом и занимают всю ширину */
+  .result-actions {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .result-actions .button {
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
 
 }

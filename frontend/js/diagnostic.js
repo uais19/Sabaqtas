@@ -1,0 +1,176 @@
+// diagnostic.js — экран диагностики.
+// Показываем вопрос за вопросом и рисуем лесенку пройденных тем,
+// пока бэкенд не ответит status: "finished" — то есть не найдёт корневой пробел.
+
+// --- Состояние экрана. Держим в одном месте, чтобы было видно, что меняется. ---
+let diagnosticId = null;      // id диагностики, его выдаёт бэкенд
+let currentQuestion = null;   // вопрос, который сейчас на экране
+let isWaiting = false;        // пока показываем «верно/неверно», нажатия игнорируем
+
+// --- Элементы страницы ---
+const stateQuestion = document.getElementById("state-question");
+const stateResult = document.getElementById("state-result");
+const questionTopic = document.getElementById("question-topic");
+const questionText = document.getElementById("question-text");
+const answersBox = document.getElementById("answers");
+const chainTitle = document.getElementById("chain-title");
+const chainBox = document.getElementById("chain");
+const resultChainBox = document.getElementById("result-chain");
+const resultText = document.getElementById("result-text");
+const resultSource = document.getElementById("result-source");
+const errorBox = document.getElementById("error");
+
+// Пауза на нужное число миллисекунд. Нужна, чтобы ученик успел увидеть,
+// верно он ответил или нет, прежде чем появится следующий вопрос.
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// --- Лесенка -------------------------------------------------------------
+
+// Одна строка лесенки: тема слева, класс посередине, отметка справа.
+// isRoot — это и есть найденный корневой пробел, его выделяем золотым.
+function createStairRow(topic, isRoot) {
+  const row = document.createElement("li");
+  row.className = "stair";
+  if (isRoot) row.classList.add("stair-gap");
+
+  const title = document.createElement("span");
+  title.className = "stair-topic";
+  title.textContent = topic.title;
+
+  const grade = document.createElement("span");
+  grade.className = "stair-grade";
+  grade.textContent = topic.grade + " класс";
+
+  const status = document.createElement("span");
+  status.className = "stair-status";
+  if (isRoot) status.textContent = "здесь пробел";
+  else if (topic.is_correct) status.textContent = "✓ понятно";
+  else status.textContent = "✕ не получилось";
+
+  row.append(title, grade, status);
+  return row;
+}
+
+// Добавляем в лесенку под вопросом ещё одну пройденную тему.
+function addChainRow(topic) {
+  const row = createStairRow(topic, false);
+  // Класс запускает короткое появление строки — ученик замечает, что она новая.
+  row.classList.add("stair-appear");
+  chainBox.append(row);
+  chainTitle.classList.remove("is-hidden");
+}
+
+// --- Вопрос --------------------------------------------------------------
+
+// Рисуем вопрос и кнопки ответов.
+function showQuestion(question) {
+  currentQuestion = question;
+  questionTopic.textContent = question.topic_title + " · " + question.grade + " класс";
+  questionText.textContent = question.text;
+
+  answersBox.textContent = ""; // убираем кнопки прошлого вопроса
+
+  question.options.forEach((option) => {
+    answersBox.append(createAnswerButton(option, false));
+  });
+
+  // Пятая кнопка есть всегда. Бэкенд засчитывает её как неверный ответ.
+  answersBox.append(createAnswerButton("Не знаю", true));
+}
+
+// Кнопка одного варианта ответа.
+function createAnswerButton(text, isDontKnow) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "answer";
+  if (isDontKnow) button.classList.add("answer-dontknow");
+  button.textContent = text;
+  button.addEventListener("click", () => handleAnswer(text, button));
+  return button;
+}
+
+// Ученик нажал на вариант ответа.
+async function handleAnswer(answerText, button) {
+  // Второе нажатие, пока показываем результат предыдущего, пропускаем.
+  if (isWaiting) return;
+  isWaiting = true;
+
+  try {
+    const reply = await sendDiagnosticAnswer(diagnosticId, currentQuestion.id, answerText);
+
+    // Подсвечиваем нажатую кнопку: верный ответ зелёным, неверный красным.
+    button.classList.add(reply.is_correct ? "is-correct" : "is-wrong");
+
+    // Тема текущего вопроса уходит в лесенку с отметкой.
+    addChainRow({
+      title: currentQuestion.topic_title,
+      grade: currentQuestion.grade,
+      is_correct: reply.is_correct
+    });
+
+    await wait(600); // время, чтобы увидеть подсветку
+
+    if (reply.status === "finished") showResult(reply.result);
+    else showQuestion(reply.question);
+  } catch (error) {
+    showError();
+  }
+
+  isWaiting = false;
+}
+
+// --- Результат -----------------------------------------------------------
+
+// Переключаемся на второе состояние страницы и рисуем итог.
+function showResult(result) {
+  stateQuestion.classList.add("is-hidden");
+  stateResult.classList.remove("is-hidden");
+
+  // Полная цепочка тем приходит с бэкенда — рисуем её заново,
+  // выделяя ту тему, которая оказалась корневым пробелом.
+  resultChainBox.textContent = "";
+  result.path.forEach((topic) => {
+    const isRoot = topic.topic_id === result.root_topic.id;
+    resultChainBox.append(createStairRow(topic, isRoot));
+  });
+
+  // Текст собираем из данных, а не пишем названия тем руками:
+  // при другом пробеле страница должна говорить правду.
+  const firstTopic = result.path[0];
+  const root = result.root_topic;
+  resultText.textContent =
+    'Начинаем не с темы "' + firstTopic.title + '", а с темы "' + root.title +
+    '" за ' + root.grade + ' класс. Пока не закроем её, остальное решать бесполезно.';
+  resultSource.textContent = "источник — " + root.source_ref;
+}
+
+// --- Запуск и перезапуск -------------------------------------------------
+
+function showError() {
+  errorBox.textContent = "Не удалось загрузить вопрос. Обнови страницу и попробуй ещё раз.";
+  errorBox.classList.remove("is-hidden");
+}
+
+// Начинаем диагностику: спрашиваем у бэкенда первый вопрос.
+async function start() {
+  errorBox.classList.add("is-hidden");
+  chainBox.textContent = "";
+  chainTitle.classList.add("is-hidden");
+  stateResult.classList.add("is-hidden");
+  stateQuestion.classList.remove("is-hidden");
+
+  try {
+    const data = await startDiagnostic("math", 9);
+    diagnosticId = data.diagnostic_id;
+    showQuestion(data.question);
+  } catch (error) {
+    showError();
+  }
+}
+
+// «Пройти заново» — то же самое, что открыть страницу заново.
+document.getElementById("restart").addEventListener("click", start);
+
+start();

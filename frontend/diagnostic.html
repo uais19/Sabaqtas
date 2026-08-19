@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Диагностика — Sabaqtas</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Порядок важен: mock.js готовит данные, api.js их отдаёт,
+       diagnostic.js рисует экран. defer сохраняет этот порядок. -->
+  <script src="js/mock.js" defer></script>
+  <script src="js/api.js" defer></script>
+  <script src="js/diagnostic.js" defer></script>
+</head>
+<body>
+
+  <!-- Простая шапка: только логотип, ссылок по секциям здесь нет -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="wordmark" href="index.html">Sabaqtas</a>
+    </div>
+  </header>
+
+  <main class="container page-narrow">
+
+    <!-- ===== СОСТОЯНИЕ 1: ВОПРОС ===== -->
+    <section id="state-question">
+
+      <h1 class="page-title">Диагностика</h1>
+      <p class="page-subtitle">
+        Отвечай честно. Если не знаешь — так и скажи, это поможет найти пробел быстрее.
+      </p>
+
+      <div class="question-card">
+        <!-- Тема и класс текущего вопроса -->
+        <p class="question-topic" id="question-topic"></p>
+        <p class="question-text" id="question-text"></p>
+        <!-- Кнопки ответов создаёт diagnostic.js -->
+        <div class="answers" id="answers"></div>
+      </div>
+
+      <!-- Лесенка растёт по мере ответов: ученик видит, как система
+           спускается по классам вниз -->
+      <p class="chain-title is-hidden" id="chain-title">Что уже проверили</p>
+      <ol class="stairs" id="chain"></ol>
+
+    </section>
+
+    <!-- ===== СОСТОЯНИЕ 2: РЕЗУЛЬТАТ ===== -->
+    <section id="state-result" class="is-hidden">
+
+      <h1 class="page-title">Нашли, где ты застрял</h1>
+
+      <ol class="stairs stairs-result" id="result-chain"></ol>
+
+      <div class="result-card">
+        <p class="result-text" id="result-text"></p>
+        <p class="result-source" id="result-source"></p>
+      </div>
+
+      <div class="result-actions">
+        <a class="button button-primary" href="plan.html">Составить план</a>
+        <button class="link-button" type="button" id="restart">Пройти заново</button>
+      </div>
+
+    </section>
+
+    <!-- Сообщение, если бэкенд не ответил -->
+    <p class="error-message is-hidden" id="error"></p>
+
+  </main>
+
+</body>
+</html>

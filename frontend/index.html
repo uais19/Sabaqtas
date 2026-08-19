@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sabaqtas — поймём, где ты застрял</title>
+  <!-- Крошечный скрипт до стилей: помечает страницу как «скрипты работают».
+       Только после этого CSS прячет элементы для появления при прокрутке.
+       Если JavaScript выключен, класса не будет и весь текст виден сразу. -->
+  <script>
+    document.documentElement.classList.add("js-reveal");
+  </script>
   <link rel="stylesheet" href="css/style.css">
   <!-- nav.js подсвечивает ссылку на ту секцию, которую сейчас видно.
        menu.js открывает и закрывает мобильное меню.
@@ -11,6 +17,8 @@
        на тех экранах, где реально нужны данные. -->
   <script src="js/nav.js" defer></script>
   <script src="js/menu.js" defer></script>
+  <script src="js/reveal.js" defer></script>
+  <script src="js/rotator.js" defer></script>
 </head>
 <body id="top">
 
@@ -63,7 +71,7 @@
     <!-- ГЛАВНЫЙ ЭКРАН -->
     <section class="hero bg-1">
       <div class="container hero-inner">
-        <h1>Поймём, где ты застрял</h1>
+        <h1>Поймём, где ты застрял в <span id="rotator">математике</span></h1>
         <p class="hero-subtitle">
           Задача не решается? Обычно дело в теме, которую проходили раньше.
           Sabaqtas найдёт её и поможет разобраться.
@@ -75,21 +83,21 @@
     <!-- ПРОБЛЕМА -->
     <section class="section bg-2" id="problem">
       <div class="container">
-        <h2 class="section-title">Проблема</h2>
+        <h2 class="section-title reveal">Проблема</h2>
         <div class="cards cards-3">
 
-          <article class="card">
+          <article class="card reveal">
             <h3 class="card-title">Не у всех есть репетитор</h3>
             <p class="card-text">В селе трудно найти того, кто объяснит после уроков.</p>
           </article>
 
-          <article class="card">
+          <article class="card reveal">
             <h3 class="card-title">Учитель один на всех</h3>
             <!-- TODO: вставить реальную цифру со ссылкой на источник -->
             <p class="card-text">В классе __ учеников. Проверить каждого просто некогда.</p>
           </article>
 
-          <article class="card">
+          <article class="card reveal">
             <h3 class="card-title">ИИ решает вместо ученика</h3>
             <p class="card-text">Поэтому во многих школах его запрещают.</p>
           </article>
@@ -101,7 +109,7 @@
     <!-- РЕШЕНИЕ -->
     <section class="section bg-3" id="solution">
       <div class="container">
-        <h2 class="section-title">Решение</h2>
+        <h2 class="section-title reveal">Решение</h2>
         <p class="solution-text">
           Sabaqtas находит тему, которую ученик не понял, и ведёт его к ответу
           подсказками. Всё объяснение берётся из школьного учебника.
@@ -114,33 +122,33 @@
          вниз до той темы, где на самом деле пробел. -->
     <section class="section spotlight" id="example">
       <div class="container">
-        <h2 class="section-title">Пример</h2>
+        <h2 class="section-title reveal">Пример</h2>
         <p class="example-intro">
-          Ученик 9 класса не решает квадратные уравнения.
+          У ученика 9 класса не получаются квадратные уравнения.
           Вот что находит Sabaqtas:
         </p>
 
         <ol class="stairs">
 
-          <li class="stair">
+          <li class="stair reveal">
             <span class="stair-topic">Квадратные уравнения</span>
             <span class="stair-grade">9 класс</span>
             <span class="stair-status">✕ не получилось</span>
           </li>
 
-          <li class="stair">
+          <li class="stair reveal">
             <span class="stair-topic">Формулы сокращённого умножения</span>
             <span class="stair-grade">7 класс</span>
             <span class="stair-status">✕ не получилось</span>
           </li>
 
-          <li class="stair stair-gap">
+          <li class="stair stair-gap reveal">
             <span class="stair-topic">Действия с дробями</span>
             <span class="stair-grade">6 класс</span>
             <span class="stair-status">← здесь пробел</span>
           </li>
 
-          <li class="stair">
+          <li class="stair reveal">
             <span class="stair-topic">Умножение и деление</span>
             <span class="stair-grade">5 класс</span>
             <span class="stair-status">✓ понятно</span>
@@ -157,25 +165,25 @@
     <!-- КАК ЭТО РАБОТАЕТ -->
     <section class="section bg-1" id="how">
       <div class="container">
-        <h2 class="section-title">Как это работает</h2>
+        <h2 class="section-title reveal">Как это работает</h2>
         <ol class="steps">
 
-          <li class="step">
+          <li class="step reveal">
             <span class="step-number">1</span>
             <p class="step-text">Отвечаешь на несколько вопросов</p>
           </li>
 
-          <li class="step">
+          <li class="step reveal">
             <span class="step-number">2</span>
             <p class="step-text">Находим тему, которую ты не понял — даже если её проходили давно</p>
           </li>
 
-          <li class="step">
+          <li class="step reveal">
             <span class="step-number">3</span>
             <p class="step-text">Составляем план и начинаем с неё</p>
           </li>
 
-          <li class="step">
+          <li class="step reveal">
             <span class="step-number">4</span>
             <p class="step-text">Помогаем решить самому, подсказками, без готового ответа</p>
           </li>
@@ -187,10 +195,10 @@
     <!-- ЧЕМ МЫ ОТЛИЧАЕМСЯ -->
     <section class="section bg-2" id="different">
       <div class="container">
-        <h2 class="section-title">Чем мы отличаемся</h2>
+        <h2 class="section-title reveal">Чем мы отличаемся</h2>
         <div class="cards cards-3">
 
-          <article class="card card-strong">
+          <article class="card card-strong reveal">
             <h3 class="card-title">Пробел из прошлых классов</h3>
             <p class="card-text">
               Ты не решаешь задачу за 9 класс, потому что не понял тему за 6-й.
@@ -198,7 +206,7 @@
             </p>
           </article>
 
-          <article class="card card-strong">
+          <article class="card card-strong reveal">
             <h3 class="card-title">Режим наставника</h3>
             <p class="card-text">
               ИИ не даёт готовый ответ. Он задаёт вопросы и помогает дойти
@@ -206,7 +214,7 @@
             </p>
           </article>
 
-          <article class="card card-strong">
+          <article class="card card-strong reveal">
             <h3 class="card-title">Только из учебника</h3>
             <p class="card-text">
               Каждый ответ со ссылкой на параграф и страницу.
@@ -222,7 +230,7 @@
     <!-- ДЛЯ УЧИТЕЛЕЙ -->
     <section class="section bg-3" id="teachers">
       <div class="container teachers">
-        <h2 class="section-title">Учителям</h2>
+        <h2 class="section-title reveal">Учителям</h2>
         <p class="teachers-text">
           Видно, кто где застрял и кому нужна помощь. Проверять тетради не нужно.
         </p>
