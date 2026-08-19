@@ -3,6 +3,5 @@
 node_modules/
 __pycache__/
 .venv/
-chunks.json
 .DS_Store
 Thumbs.db
