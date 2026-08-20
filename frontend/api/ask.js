@@ -244,6 +244,20 @@ module.exports = async function handler(req, res) {
     const rawAnswer = await generateAnswer(system, contents, apiKey);
     const answer = stripLatex(rawAnswer).trim();
 
+    // Порог отсекает по похожести, но модель имеет независимое право
+    // отказаться: фрагменты могут быть близки по теме, а ответа на сам
+    // вопрос в них нет. Оба сигнала должны совпадать. Если в тексте отказ,
+    // то found = false и без источников — иначе интерфейс покажет плашку
+    // источника под ответом «этого нет в учебниках», что выглядит как ошибка.
+    if (answer.toLowerCase().includes("нет в загруженных учебниках")) {
+      return res.status(200).json({
+        answer: answer,
+        found: false,
+        topScore: Number(topScore.toFixed(3)),
+        sources: []
+      });
+    }
+
     // Источники: из каких мест учебника собран ответ.
     const sources = passed.map(function (item) {
       return {

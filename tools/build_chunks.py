@@ -92,8 +92,22 @@ def parse_chunks(text):
                 chunks.append(current)
 
             # «### Математика | 5 класс | часть 1 | §12 | стр. 45»
+            # или с пометкой «| placeholder» в конце — тестовый кусок.
             meta_line = line.lstrip("#").strip()
             parts = [piece.strip() for piece in meta_line.split("|")]
+
+            # Пометка «placeholder» живёт в метаданных, а НЕ в тексте куска:
+            # текст уходит модели, и предупреждение «тестовый текст» внутри
+            # него модель читает как «материал ненастоящий» и отказывается
+            # отвечать там, где должна ответить.
+            is_placeholder = False
+            if len(parts) == len(META_FIELDS) + 1:
+                if parts[-1].lower() != "placeholder":
+                    fail("строка %d: шестое поле может быть только «placeholder», а найдено «%s»"
+                         % (line_number, parts[-1]))
+                is_placeholder = True
+                parts = parts[:-1]
+
             if len(parts) != len(META_FIELDS):
                 fail("строка %d: ожидалось %d полей через «|», а найдено %d:\n  %s"
                      % (line_number, len(META_FIELDS), len(parts), line))
@@ -106,6 +120,7 @@ def parse_chunks(text):
                 "part": parts[2],
                 "paragraph": parts[3],
                 "page": only_number(parts[4], "страница", line_number),
+                "is_placeholder": is_placeholder,
             }
             continue
 
@@ -284,6 +299,16 @@ def main():
     print("  кусков:      %d" % len(chunks))
     print("  файл:        %s" % OUTPUT_PATH)
     print("  размер:      %.1f КБ" % size_kb)
+
+    # Громкое напоминание: заглушки не должны дожить до показа жюри.
+    placeholder_count = sum(1 for chunk in chunks if chunk["is_placeholder"])
+    if placeholder_count > 0:
+        print("")
+        print("!" * 60)
+        print("!!! ВНИМАНИЕ: %d из %d кусков — тестовые заглушки (placeholder)."
+              % (placeholder_count, len(chunks)))
+        print("!!! Замените их настоящим текстом учебника и соберите заново.")
+        print("!" * 60)
 
 
 if __name__ == "__main__":
