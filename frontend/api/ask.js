@@ -77,24 +77,67 @@ function dotProduct(a, b) {
 
 // --- Запросы к Gemini ----------------------------------------------------------
 
+// Паузы перед второй и третьей попытками, в миллисекундах.
+const RETRY_DELAYS = [1000, 3000];
+
+function wait(ms) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, ms);
+  });
+}
+
+// Один запрос к Gemini с повторами.
+// Бесплатный тариф Gemini ограничивает частоту запросов, поэтому повтор
+// с паузой обязателен — иначе на демо будет случайный сбой: каждый вопрос
+// делает два вызова (эмбеддинг и генерация), и пять вопросов подряд
+// упираются в лимит.
+//
+// Повторяем только 429 (слишком часто) и 5xx (сбой на стороне Gemini).
+// 400/401/403/404 — настоящие ошибки, повтор их не вылечит: бросаем сразу.
+// Если все попытки кончились, бросаем ошибку с пометкой isOverload —
+// обработчик по ней вернёт ученику понятный ответ 503.
+async function fetchGemini(url, payload, apiKey, label) {
+  let lastStatus = 0;
+
+  for (let attempt = 1; attempt <= RETRY_DELAYS.length + 1; attempt++) {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "x-goog-api-key": apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (response.ok) {
+      return response;
+    }
+
+    if (response.status !== 429 && response.status < 500) {
+      throw new Error(label + ": Gemini ответил кодом " + response.status);
+    }
+
+    lastStatus = response.status;
+    if (attempt <= RETRY_DELAYS.length) {
+      console.error(label + ": код " + lastStatus + ", повтор через " +
+        RETRY_DELAYS[attempt - 1] + " мс (попытка " + (attempt + 1) + " из " +
+        (RETRY_DELAYS.length + 1) + ")");
+      await wait(RETRY_DELAYS[attempt - 1]);
+    }
+  }
+
+  const overload = new Error(label + ": Gemini перегружен, последний код " + lastStatus);
+  overload.isOverload = true;
+  throw overload;
+}
+
 // Вектор для вопроса ученика.
 async function embedQuestion(question, apiKey) {
-  const response = await fetch(API_BASE + EMBED_MODEL + ":embedContent", {
-    method: "POST",
-    headers: { "x-goog-api-key": apiKey, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "models/" + EMBED_MODEL,
-      content: { parts: [{ text: question }] },
-      // RETRIEVAL_QUERY — это вопрос, которым ищут; куски учебника
-      // считались с парным типом RETRIEVAL_DOCUMENT.
-      taskType: "RETRIEVAL_QUERY",
-      outputDimensionality: OUTPUT_DIMENSIONALITY
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error("эмбеддинг: Gemini ответил кодом " + response.status);
-  }
+  const response = await fetchGemini(API_BASE + EMBED_MODEL + ":embedContent", {
+    model: "models/" + EMBED_MODEL,
+    content: { parts: [{ text: question }] },
+    // RETRIEVAL_QUERY — это вопрос, которым ищут; куски учебника
+    // считались с парным типом RETRIEVAL_DOCUMENT.
+    taskType: "RETRIEVAL_QUERY",
+    outputDimensionality: OUTPUT_DIMENSIONALITY
+  }, apiKey, "эмбеддинг");
 
   const data = await response.json();
   return normalize(data.embedding.values);
@@ -103,20 +146,12 @@ async function embedQuestion(question, apiKey) {
 // Ответ генеративной модели.
 // contents — история разговора в формате Gemini, system — инструкция.
 async function generateAnswer(system, contents, apiKey) {
-  const response = await fetch(API_BASE + GENERATE_MODEL + ":generateContent", {
-    method: "POST",
-    headers: { "x-goog-api-key": apiKey, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: system }] },
-      contents: contents,
-      // Низкая температура: меньше выдумки, ответы ближе к тексту учебника.
-      generationConfig: { temperature: 0.2 }
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error("генерация: Gemini ответил кодом " + response.status);
-  }
+  const response = await fetchGemini(API_BASE + GENERATE_MODEL + ":generateContent", {
+    systemInstruction: { parts: [{ text: system }] },
+    contents: contents,
+    // Низкая температура: меньше выдумки, ответы ближе к тексту учебника.
+    generationConfig: { temperature: 0.2 }
+  }, apiKey, "генерация");
 
   const data = await response.json();
   const candidate = data.candidates && data.candidates[0];
@@ -281,8 +316,17 @@ module.exports = async function handler(req, res) {
       sources: sources
     });
   } catch (error) {
-    // Логируем причину на сервере, наружу отдаём общий текст без деталей.
+    // Логируем причину на сервере, наружу отдаём общий текст без деталей:
+    // сырая ошибка Gemini не должна доходить до клиента.
     console.error("Ошибка ask.js: " + error.message);
+
+    // Все попытки упёрлись в лимит частоты — это временно, так и говорим.
+    if (error.isOverload) {
+      return res.status(503).json({
+        error: "Слишком много запросов. Подожди пару секунд и спроси снова."
+      });
+    }
+
     return res.status(502).json({ error: "Не удалось получить ответ. Попробуйте ещё раз." });
   }
 };

@@ -152,7 +152,21 @@ async function send() {
     });
 
     if (!response.ok) {
-      throw new Error("код " + response.status);
+      // Сервер мог объяснить причину по-человечески — например, что
+      // запросов слишком много и надо чуть подождать. Тогда показываем
+      // его текст: ученик должен понять, что это временно, а не поломка.
+      let serverText = "";
+      try {
+        const errorData = await response.json();
+        if (errorData && typeof errorData.error === "string") {
+          serverText = errorData.error;
+        }
+      } catch (parseError) {
+        // тело не JSON — покажем общее сообщение
+      }
+      const failure = new Error("код " + response.status);
+      failure.serverText = serverText;
+      throw failure;
     }
 
     const data = await response.json();
@@ -170,9 +184,10 @@ async function send() {
     conversation.push({ role: "user", text: question });
     conversation.push({ role: "ai", text: data.answer });
   } catch (error) {
-    // Причина не важна ученику: сеть, сервер, что угодно. Говорим спокойно.
+    // Если сервер прислал понятный текст — показываем его,
+    // иначе общее спокойное сообщение.
     typing.remove();
-    addSystemLine("Не получилось связаться с сервером. Попробуй ещё раз");
+    addSystemLine(error.serverText || "Не получилось связаться с сервером. Попробуй ещё раз");
   }
 
   isWaiting = false;
