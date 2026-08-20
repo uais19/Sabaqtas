@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Чат с ИИ — Sabaqtas</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Этот экран ходит прямо в /api/ask, поэтому mock.js и api.js не нужны -->
+  <script src="js/chat.js" defer></script>
+</head>
+<body class="chat-body">
+
+  <!-- Простая шапка: только логотип -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="wordmark" href="index.html">Sabaqtas</a>
+    </div>
+  </header>
+
+  <main class="chat-page">
+
+    <h1 class="chat-title">Чат с ИИ</h1>
+
+    <!-- Переключатели режима и языка. Видны всегда. -->
+    <div class="chat-controls">
+
+      <div class="chat-controls-left">
+        <div class="mode-switch" role="group" aria-label="Режим">
+          <button class="mode-button is-active" type="button" data-mode="explain">Объясни</button>
+          <button class="mode-button" type="button" data-mode="mentor">Помоги решить самому</button>
+        </div>
+        <!-- Строка под переключателем меняется вместе с режимом -->
+        <p class="mode-hint" id="mode-hint">Отвечаю по учебнику и показываю источник</p>
+      </div>
+
+      <div class="lang-switch" role="group" aria-label="Язык ответа">
+        <button class="lang-button is-active" type="button" data-lang="ru">Рус</button>
+        <button class="lang-button" type="button" data-lang="kk">Қаз</button>
+      </div>
+
+    </div>
+
+    <!-- Лента сообщений. Прокручивается только она,
+         шапка и поле ввода остаются на месте. -->
+    <div class="chat-messages" id="messages"></div>
+
+    <!-- Поле ввода прижато к низу -->
+    <div class="chat-input-row">
+      <textarea class="chat-input" id="input" rows="1"
+        placeholder="Спроси что угодно по теме"></textarea>
+      <button class="chat-send" type="button" id="send">Отправить</button>
+    </div>
+
+  </main>
+
+</body>
+</html>

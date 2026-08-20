@@ -406,6 +406,280 @@ a:hover {
 }
 
 /* ============================================================
+   Экран чата с ИИ (chat.html)
+   Раскладка на всю высоту экрана: шапка и поле ввода на месте,
+   прокручивается только лента сообщений.
+   ============================================================ */
+
+/* Страница-колонка во всю высоту окна. dvh точнее vh на телефонах:
+   учитывает панели браузера. Для старых браузеров ниже запасной vh. */
+.chat-body {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  /* прокручивается лента, а не вся страница */
+  overflow: hidden;
+}
+
+.chat-page {
+  flex: 1;
+  /* min-height: 0 обязателен: без него flex-колонка не даёт
+     внутренней ленте сжаться и прокрутка не появляется */
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.chat-title {
+  font-size: 27px;
+  margin-top: 20px;
+}
+
+/* --- Переключатели --- */
+
+.chat-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+/* Режим: две кнопки в одной рамке */
+.mode-switch {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  /* скругление рамки должно резать углы кнопок внутри */
+  overflow: hidden;
+}
+
+.mode-button {
+  min-height: 48px;
+  padding: 10px 18px;
+  border: none;
+  background-color: var(--bg-1);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.mode-button.is-active {
+  background-color: var(--accent);
+  color: #FFFFFF;
+}
+
+.mode-hint {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.lang-switch {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.lang-button {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background-color: var(--bg-1);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.lang-button.is-active {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: #FFFFFF;
+}
+
+/* --- Лента сообщений --- */
+
+.chat-messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 2px;
+}
+
+.msg {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-size: 17px;
+  line-height: 1.5;
+  /* Shift+Enter в поле ввода даёт перенос строки — сохраняем его */
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+/* Сообщение ученика: справа, лёгкая заливка акцентным цветом */
+.msg-user {
+  align-self: flex-end;
+  background-color: rgba(0, 163, 196, 0.13);
+  border-bottom-right-radius: 4px;
+}
+
+/* Ответ ИИ: слева, светлая подложка */
+.msg-ai {
+  align-self: flex-start;
+  background-color: var(--bg-2);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+
+/* Честный отказ «этого нет в учебниках»: приглушённый текст.
+   Это НЕ ошибка, поэтому никакого красного и никаких значков. */
+.msg-muted {
+  color: var(--muted);
+}
+
+/* Служебная строка («Режим изменён…», сообщение о сбое сети) */
+.msg-system {
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  margin: 6px 0;
+}
+
+/* --- Плашка источника — фирменный элемент продукта.
+   Как и на экране результата: золотая полоса слева. --- */
+
+.msg-sources {
+  align-self: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 85%;
+}
+
+.source-badge {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--muted);
+  background-color: var(--bg-1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  border-radius: 6px;
+  padding: 5px 10px;
+}
+
+/* --- Индикатор «печатает» --- */
+
+.msg-typing {
+  color: var(--muted);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+  .msg-typing .dot {
+    animation: typing-dot 1.2s infinite;
+  }
+
+  .msg-typing .dot:nth-child(2) { animation-delay: 0.2s; }
+  .msg-typing .dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typing-dot {
+    0%, 60%, 100% { opacity: 0.25; }
+    30% { opacity: 1; }
+  }
+
+}
+
+/* --- Поле ввода, прижато к низу --- */
+
+.chat-input-row {
+  display: flex;
+  gap: 10px;
+  padding: 12px 0 16px;
+  border-top: 1px solid var(--border);
+}
+
+.chat-input {
+  flex: 1;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background-color: var(--bg-1);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 17px;
+  line-height: 1.4;
+  resize: none;
+}
+
+.chat-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.chat-send {
+  min-height: 48px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 10px;
+  background-color: var(--accent);
+  color: #FFFFFF;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chat-send:hover {
+  background-color: var(--accent-dark);
+}
+
+/* Пока ждём ответ, кнопка выключена */
+.chat-send:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* Чат на телефоне: переключатели в столбик, кнопки режима во всю ширину */
+@media (max-width: 800px) {
+
+  .chat-title {
+    font-size: 23px;
+  }
+
+  .chat-controls {
+    flex-direction: column;
+  }
+
+  .mode-switch {
+    display: flex;
+    width: 100%;
+  }
+
+  .mode-button {
+    flex: 1;
+    padding: 10px 8px;
+  }
+
+  .msg {
+    max-width: 92%;
+  }
+
+}
+
+/* ============================================================
    Мобильное меню: кнопка-бургер и выезжающая панель
    Всё состояние — класс .menu-open на <body>, его ставит menu.js.
    ============================================================ */
