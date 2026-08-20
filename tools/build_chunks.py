@@ -6,7 +6,7 @@
 # Так ответ приходит быстрее и запросов к платному API меньше.
 #
 # Что делает скрипт:
-#   1. читает content/sample.txt
+#   1. читает content/math5-drobi.txt
 #   2. режет текст на куски по строкам, которые начинаются с ###
 #   3. для каждого куска просит у Gemini эмбеддинг
 #   4. складывает всё в frontend/api/chunks.json
@@ -28,7 +28,10 @@ import requests
 # Пути считаем от корня проекта, а не от текущей папки,
 # поэтому скрипт можно запускать откуда угодно.
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SOURCE_PATH = os.path.join(ROOT, "content", "sample.txt")
+# Настоящие фрагменты учебника «Математика, 5 класс» (Әбілқасымова А.Е.).
+# Старый тестовый файл content/sample.txt остаётся в репозитории как пример
+# формата, но в сборке больше не участвует.
+SOURCE_PATH = os.path.join(ROOT, "content", "math5-drobi.txt")
 OUTPUT_PATH = os.path.join(ROOT, "frontend", "api", "chunks.json")
 
 MODEL = "gemini-embedding-2"
