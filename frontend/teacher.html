@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Панель учителя — Sabaqtas</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Только два скрипта: данные и отрисовка.
+       nav.js и menu.js сюда не подключаем — они нужны лендингу. -->
+  <script src="js/teacher-mock.js" defer></script>
+  <script src="js/teacher.js" defer></script>
+</head>
+<body>
+
+  <!-- Простая шапка: только логотип -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="wordmark" href="index.html">Sabaqtas</a>
+    </div>
+  </header>
+
+  <main class="container teacher-page">
+
+    <h1 class="page-title teacher-title">Панель учителя · <span id="class-title"></span></h1>
+
+    <!-- Три плитки со сводкой -->
+    <div class="tiles">
+      <div class="tile">
+        <p class="tile-number" id="tile-students"></p>
+        <p class="tile-label">Учеников</p>
+      </div>
+      <div class="tile">
+        <p class="tile-number" id="tile-closed"></p>
+        <p class="tile-label">Закрыто пробелов</p>
+      </div>
+      <div class="tile">
+        <p class="tile-number" id="tile-gaveup"></p>
+        <p class="tile-label">Сдались на этой неделе</p>
+      </div>
+    </div>
+
+    <!-- Таблица учеников -->
+    <section class="teacher-section">
+      <h2 class="teacher-heading">Ученики</h2>
+      <!-- Обёртка даёт таблице горизонтальную прокрутку на телефоне -->
+      <div class="table-scroll">
+        <table class="students-table">
+          <thead>
+            <tr>
+              <th>Ученик</th>
+              <th>Корневой пробел</th>
+              <th>Прогресс</th>
+              <th>Сдался раз</th>
+            </tr>
+          </thead>
+          <tbody id="students-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Главный блок страницы: что объяснять всему классу -->
+    <section class="teacher-section">
+      <h2 class="teacher-heading">Что западает у класса</h2>
+      <div class="class-topics" id="class-topics"></div>
+    </section>
+
+    <!-- Добавить тему в блок выше. Только на этой странице, без сохранения. -->
+    <section class="teacher-section">
+      <h2 class="teacher-heading">Добавить тему</h2>
+      <form class="add-topic" id="add-topic-form">
+        <input class="add-input add-input-title" id="add-title" type="text"
+          placeholder="Тема" required>
+        <select class="add-input" id="add-grade" aria-label="Класс">
+          <option value="5">5 класс</option>
+          <option value="6">6 класс</option>
+          <option value="7" selected>7 класс</option>
+          <option value="8">8 класс</option>
+          <option value="9">9 класс</option>
+        </select>
+        <input class="add-input" id="add-source" type="text"
+          placeholder="Источник (§)" required>
+        <button class="button button-primary add-submit" type="submit">Добавить</button>
+      </form>
+    </section>
+
+  </main>
+
+</body>
+</html>
