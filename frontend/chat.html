@@ -33,9 +33,22 @@
         <p class="mode-hint" id="mode-hint">Отвечаю по учебнику и показываю источник</p>
       </div>
 
-      <div class="lang-switch" role="group" aria-label="Язык ответа">
-        <button class="lang-button is-active" type="button" data-lang="ru">Рус</button>
-        <button class="lang-button" type="button" data-lang="kk">Қаз</button>
+      <div class="chat-controls-right">
+        <div class="lang-switch" role="group" aria-label="Язык ответа">
+          <button class="lang-button is-active" type="button" data-lang="ru">Рус</button>
+          <button class="lang-button" type="button" data-lang="kk">Қаз</button>
+        </div>
+        <!-- Класс ученика: уходит в запрос как grade,
+             чтобы ИИ объяснял на нужном уровне -->
+        <select class="grade-select" id="grade" aria-label="Класс">
+          <option value="5">5 класс</option>
+          <option value="6">6 класс</option>
+          <option value="7">7 класс</option>
+          <option value="8" selected>8 класс</option>
+          <option value="9">9 класс</option>
+          <option value="10">10 класс</option>
+          <option value="11">11 класс</option>
+        </select>
       </div>
 
     </div>

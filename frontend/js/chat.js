@@ -15,6 +15,7 @@ const sendButton = document.getElementById("send");
 const modeHint = document.getElementById("mode-hint");
 const modeButtons = document.querySelectorAll(".mode-button");
 const langButtons = document.querySelectorAll(".lang-button");
+const gradeSelect = document.getElementById("grade");
 
 // Тексты, которые меняются вместе с режимом.
 const MODE_HINTS = {
@@ -46,20 +47,51 @@ function addBubble(from, text, muted) {
   return bubble;
 }
 
+// «часть 1» -> «ч.1», чтобы строка источника оставалась короткой.
+function shortPart(part) {
+  return part ? part.replace("часть ", "ч.") : "";
+}
+
 // Плашка источника под ответом ИИ. Вызывается ТОЛЬКО когда источники есть:
 // пустую плашку или заглушку не рисуем никогда.
+// Одна тихая строка. Один источник — полная ссылка со страницей.
+// Несколько — группируем по книге и перечисляем параграфы без повторов:
+// «Источник: Математика, 5 класс, ч.1 — §12, §13, §14».
 function addSourceBadge(sources) {
+  // Группируем по книге (book приходит уже с классом: «Математика, 5 класс»).
+  // Внутри группы параграфы без дублей — одинаковые куски одного параграфа
+  // не должны превращаться в «§12, §12, §12».
+  const groups = [];
+  sources.forEach(function (source) {
+    const key = source.book + "|" + source.part;
+    let group = groups.find(function (g) { return g.key === key; });
+    if (!group) {
+      group = { key: key, book: source.book, part: source.part, paragraphs: [] };
+      groups.push(group);
+    }
+    if (group.paragraphs.indexOf(source.paragraph) === -1) {
+      group.paragraphs.push(source.paragraph);
+    }
+  });
+
+  let text;
+  if (sources.length === 1) {
+    // Единственный источник: полная ссылка со страницей.
+    const s = sources[0];
+    text = "Источник: " + s.book + ", " + shortPart(s.part) + ", " +
+      s.paragraph + ", стр. " + s.page;
+  } else {
+    text = "Источник: " + groups.map(function (g) {
+      return g.book + ", " + shortPart(g.part) + " — " + g.paragraphs.join(", ");
+    }).join("; ");
+  }
+
   const box = document.createElement("div");
   box.className = "msg-sources";
-  sources.forEach(function (source) {
-    const badge = document.createElement("span");
-    badge.className = "source-badge";
-    // source.book приходит уже с классом («Математика, 5 класс»),
-    // поэтому класс отдельно не добавляем — иначе он задвоится.
-    badge.textContent = source.book + ", " +
-      source.part + ", " + source.paragraph + ", стр. " + source.page;
-    box.append(badge);
-  });
+  const badge = document.createElement("span");
+  badge.className = "source-badge";
+  badge.textContent = text;
+  box.append(badge);
   messagesBox.append(box);
   scrollToBottom();
 }
@@ -99,7 +131,13 @@ async function send() {
 
   // Тело запроса. Историю шлём только в режиме наставника: там ИИ должен
   // помнить разговор. В режиме «объясни» каждый вопрос независим.
-  const body = { question: question, mode: mode, lang: lang, grade: 5 };
+  // Класс берём из выпадающего списка — он не зашит в код.
+  const body = {
+    question: question,
+    mode: mode,
+    lang: lang,
+    grade: Number(gradeSelect.value)
+  };
   if (mode === "mentor") {
     body.history = conversation.slice();
   }

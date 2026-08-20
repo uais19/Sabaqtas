@@ -249,7 +249,10 @@ module.exports = async function handler(req, res) {
     // вопрос в них нет. Оба сигнала должны совпадать. Если в тексте отказ,
     // то found = false и без источников — иначе интерфейс покажет плашку
     // источника под ответом «этого нет в учебниках», что выглядит как ошибка.
-    if (answer.toLowerCase().includes("нет в загруженных учебниках")) {
+    // Проверяем обе фразы отказа: «объясни» и «наставник» говорят по-разному.
+    const lowerAnswer = answer.toLowerCase();
+    if (lowerAnswer.includes("нет в загруженных учебниках") ||
+        lowerAnswer.includes("загруженных материалах этой темы нет")) {
       return res.status(200).json({
         answer: answer,
         found: false,

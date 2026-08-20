@@ -481,9 +481,28 @@ a:hover {
   margin-top: 8px;
 }
 
+.chat-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .lang-switch {
   display: inline-flex;
   gap: 6px;
+}
+
+/* Выпадающий список класса — в один ряд с кнопками языка */
+.grade-select {
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background-color: var(--bg-1);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 15px;
+  cursor: pointer;
 }
 
 .lang-button {
@@ -572,11 +591,9 @@ a:hover {
   display: inline-block;
   font-size: 13px;
   color: var(--muted);
-  background-color: var(--bg-1);
-  border: 1px solid var(--border);
+  /* Тихая строка: только тонкая золотая метка слева, без рамки-карточки */
   border-left: 3px solid var(--gold);
-  border-radius: 6px;
-  padding: 5px 10px;
+  padding: 1px 0 1px 8px;
 }
 
 /* --- Индикатор «печатает» --- */
