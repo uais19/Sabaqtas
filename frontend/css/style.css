@@ -927,6 +927,12 @@ h1 {
   margin: 0 auto;
 }
 
+/* Кнопка «Спросить ИИ» под текстом решения */
+.solution-action {
+  text-align: center;
+  margin-top: 28px;
+}
+
 .section-title {
   font-size: 32px;
   text-align: center;
