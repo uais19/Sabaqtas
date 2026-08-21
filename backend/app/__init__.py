@@ -1,0 +1,1 @@
+"""Sabaqtas backend application."""
