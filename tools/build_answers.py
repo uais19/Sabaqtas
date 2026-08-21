@@ -8,8 +8,8 @@
 # Что делает скрипт:
 #   1. читает tools/demo_questions.txt (режим | язык | класс | вопрос)
 #   2. каждый вопрос задаёт РАЗВЁРНУТОМУ сайту через /api/ask
-#   3. складывает ответы в frontend/api/answers.json под тем же ключом,
-#      которым пользуются кэши в ask.js и chat.js
+#   3. складывает ответы в frontend/api/answers.json под ключом заготовок
+#      prebakedKey() из ask.js — вопрос|режим|язык, без класса
 #
 # Запуск:  python tools/build_answers.py
 # Адрес сайта можно поменять переменной окружения SABAQTAS_URL.
@@ -91,11 +91,12 @@ def read_questions(path):
 
 # --- Ключ ответа --------------------------------------------------------------
 
-def cache_key(question, mode, lang, grade):
-    """Ключ собираем В ТОЧНОСТИ как cacheKey() в ask.js и chat.js:
-    вопрос без пробелов по краям и в нижнем регистре, дальше режим,
-    язык и класс через «|»."""
-    return question.strip().lower() + "|" + mode + "|" + lang + "|" + str(grade)
+def cache_key(question, mode, lang):
+    """Ключ собираем В ТОЧНОСТИ как prebakedKey() в ask.js: вопрос без
+    пробелов по краям и в нижнем регистре, дальше режим и язык через «|».
+    Класса в ключе НЕТ: он влияет только на тон ответа, а не на поиск,
+    поэтому одна заготовка обслуживает любой класс."""
+    return question.strip().lower() + "|" + mode + "|" + lang
 
 
 # --- Основной ход -------------------------------------------------------------
@@ -138,7 +139,12 @@ def main():
                  (item["question"], response.status_code, response.text[:200]))
 
         answer = response.json()
-        answers[cache_key(item["question"], item["mode"], item["lang"], item["grade"])] = answer
+        key = cache_key(item["question"], item["mode"], item["lang"])
+        # Два одинаковых ключа — это два вопроса, различавшихся только классом.
+        # Молча перезаписать — значит потерять ответ; лучше упасть громко.
+        if key in answers:
+            fail("ключ «%s» встретился дважды — уберите дубль из demo_questions.txt" % key)
+        answers[key] = answer
 
         # found: false — это тоже нормальный ответ («этого нет в учебниках»),
         # печатаем итог строки, чтобы ход сборки был виден.

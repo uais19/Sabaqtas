@@ -102,6 +102,13 @@ function cacheKey(question, mode, lang, grade) {
   return question.trim().toLowerCase() + "|" + mode + "|" + lang + "|" + grade;
 }
 
+// Ключ заготовок — без класса. Класс влияет только на обращение в промпте,
+// на поиск фрагментов он не влияет вообще, поэтому одной заготовки на
+// вопрос хватает для любого класса. Живой кэш класс по-прежнему учитывает.
+function prebakedKey(question, mode, lang) {
+  return question.trim().toLowerCase() + "|" + mode + "|" + lang;
+}
+
 // Кладём ответ в кэш и выбрасываем самые старые, если их стало слишком много.
 function saveToCache(key, payload) {
   ANSWER_CACHE.set(key, payload);
@@ -395,9 +402,9 @@ module.exports = async function handler(req, res) {
   // только на первой реплике. Все заготовки — первые вопросы, и отдать
   // такую посреди диалога наставника — тот же баг, что уже чинили.
   if (cacheable) {
-    const prebaked = PREBAKED[key];
+    const prebaked = PREBAKED[prebakedKey(question, mode, lang)];
     if (prebaked) {
-      console.log("Заготовленный ответ: " + key);
+      console.log("Заготовленный ответ: " + prebakedKey(question, mode, lang));
       return res.status(200).json(prebaked);
     }
   }
