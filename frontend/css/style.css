@@ -1558,3 +1558,117 @@ h1 {
   }
 
 }
+
+/* ============================================================
+   Панель учителя: дополнения добавлены в конец, чтобы не менять
+   существующие правила остальных страниц.
+   ============================================================ */
+
+.teacher-header-inner {
+  justify-content: flex-start;
+  gap: 16px;
+}
+
+.teacher-header-title {
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.teacher-summary {
+  margin-top: 8px;
+}
+
+.tiles {
+  margin-top: 0;
+}
+
+.tile {
+  min-height: 132px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: var(--surface);
+}
+
+.students-table {
+  min-width: 780px;
+}
+
+.gap-grade-cell {
+  color: var(--accent-dark);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.class-topic.is-hot {
+  background-color: var(--bg-1);
+  box-shadow: 0 3px 12px rgba(245, 179, 1, 0.2);
+}
+
+.add-topic {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.4fr) minmax(130px, 0.6fr) minmax(220px, 1fr) auto;
+  align-items: end;
+  gap: 14px;
+}
+
+.teacher-form-field {
+  display: grid;
+  gap: 6px;
+}
+
+.teacher-form-field label {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.teacher-form-field .add-input {
+  width: 100%;
+}
+
+.add-input:focus {
+  outline: 3px solid rgba(0, 163, 196, 0.2);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+
+.add-submit {
+  white-space: nowrap;
+}
+
+@media (max-width: 800px) {
+
+  .teacher-header-inner {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .teacher-header-title {
+    font-size: 19px;
+  }
+
+  .teacher-page {
+    padding-top: 28px;
+  }
+
+  .tile {
+    min-height: 112px;
+  }
+
+  .add-topic {
+    grid-template-columns: 1fr;
+  }
+
+  .add-submit {
+    width: 100%;
+  }
+}
+
+.class-topic-source {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 2px;
+}

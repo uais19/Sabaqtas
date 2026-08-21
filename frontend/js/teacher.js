@@ -1,160 +1,164 @@
-// teacher.js — отрисовка панели учителя из объекта TEACHER_MOCK.
-// Никакой логики на сервере: страница просто показывает данные.
+// teacher.js — простая отрисовка панели учителя из TEACHER_MOCK.
+// Все комментарии оставлены подробными, чтобы код можно было объяснить по строкам.
 
-// Если файл с данными не подключился, честно говорим об этом
-// вместо пустой сломанной страницы.
 if (typeof TEACHER_MOCK === "undefined") {
   document.querySelector(".teacher-page").innerHTML =
-    "<p class=\"teacher-error\">Не удалось загрузить данные класса. Обнови страницу.</p>";
+    "<p class=\"teacher-error\">Не удалось загрузить данные класса. Обновите страницу.</p>";
 } else {
   renderTeacherPage();
 }
 
 function renderTeacherPage() {
   const students = TEACHER_MOCK.students;
+  let closedGaps = 0;
+  let gaveUpCount = 0;
 
   document.getElementById("class-title").textContent = TEACHER_MOCK.class_title;
 
-  // --- Плитки: считаем сводку прямо из списка учеников ---
-  let closedTotal = 0;
-  let gaveUpTotal = 0;
+  // Считаем две общие величины из карточки каждого ученика.
   students.forEach(function (student) {
-    closedTotal += student.closed_gaps;
-    gaveUpTotal += student.gave_up_count;
+    closedGaps += student.closed_gaps;
+    gaveUpCount += student.gave_up_count;
   });
+
   document.getElementById("tile-students").textContent = students.length;
-  document.getElementById("tile-closed").textContent = closedTotal;
-  document.getElementById("tile-gaveup").textContent = gaveUpTotal;
+  document.getElementById("tile-closed").textContent = closedGaps;
+  document.getElementById("tile-gaveup").textContent = gaveUpCount;
 
-  // --- Таблица учеников ---
-  const tbody = document.getElementById("students-body");
+  const studentsBody = document.getElementById("students-body");
   students.forEach(function (student) {
-    tbody.append(createStudentRow(student));
+    studentsBody.append(createStudentRow(student));
   });
 
-  // --- Блок «Что западает у класса» ---
+  const topicsBlock = document.getElementById("class-topics");
   TEACHER_MOCK.class_stats.forEach(function (topic) {
-    document.getElementById("class-topics").append(createTopicRow(topic));
+    topicsBlock.append(createTopicRow(topic));
   });
 
-  // --- Форма «Добавить тему» ---
   document.getElementById("add-topic-form").addEventListener("submit", addTopic);
 }
 
-// Тонкая полоса прогресса: серая дорожка и цветная заливка на percent процентов.
-function createBar(percent, extraClass) {
+// Создаём тонкую полосу и ограничиваем её значение диапазоном от 0 до 100.
+function createProgressBar(percent, colorClass) {
+  const safePercent = Math.max(0, Math.min(100, percent));
   const track = document.createElement("div");
-  track.className = "bar-track";
   const fill = document.createElement("div");
-  fill.className = "bar-fill " + extraClass;
-  fill.style.width = percent + "%";
+
+  track.className = "bar-track";
+  track.setAttribute("role", "progressbar");
+  track.setAttribute("aria-valuemin", "0");
+  track.setAttribute("aria-valuemax", "100");
+  track.setAttribute("aria-valuenow", safePercent);
+  fill.className = "bar-fill " + colorClass;
+  fill.style.width = safePercent + "%";
   track.append(fill);
+
   return track;
 }
 
-// Строка таблицы про одного ученика.
+// Одна строка таблицы соответствует одному ученику.
 function createStudentRow(student) {
   const row = document.createElement("tr");
-
-  // Имя и дата последнего захода
   const nameCell = document.createElement("td");
+  const topicCell = document.createElement("td");
+  const gapGradeCell = document.createElement("td");
+  const progressCell = document.createElement("td");
+  const gaveUpCell = document.createElement("td");
   const name = document.createElement("p");
+  const lastActive = document.createElement("p");
+  const topic = document.createElement("p");
+  const source = document.createElement("p");
+  const progressBox = document.createElement("div");
+  const percent = document.createElement("span");
+
   name.className = "student-name";
   name.textContent = student.name;
-  const active = document.createElement("p");
-  active.className = "student-active";
-  active.textContent = "заходил(а) " + student.last_active;
-  nameCell.append(name, active);
+  lastActive.className = "student-active";
+  lastActive.textContent = "был(а) в сети: " + student.last_active;
+  nameCell.append(name, lastActive);
 
-  // Корневой пробел: тема, значок класса, под ними источник
-  const gapCell = document.createElement("td");
-  const topicLine = document.createElement("p");
-  topicLine.className = "gap-title";
-  topicLine.textContent = student.root_topic.title + " ";
-  const badge = document.createElement("span");
-  badge.className = "grade-badge";
-  badge.textContent = student.root_topic.grade + " класс";
-  topicLine.append(badge);
-  const source = document.createElement("p");
+  topic.className = "gap-title";
+  topic.textContent = student.root_topic.title;
   source.className = "gap-source";
   source.textContent = student.root_topic.source_ref;
-  gapCell.append(topicLine, source);
+  topicCell.append(topic, source);
 
-  // Прогресс: полоса и процент рядом
-  const progressCell = document.createElement("td");
-  const progressBox = document.createElement("div");
+  gapGradeCell.className = "gap-grade-cell";
+  gapGradeCell.textContent = student.root_topic.grade + " класс";
+
   progressBox.className = "progress-box";
-  progressBox.append(createBar(student.progress_percent, "bar-accent"));
-  const percent = document.createElement("span");
+  progressBox.append(createProgressBar(student.progress_percent, "bar-accent"));
   percent.className = "progress-percent";
   percent.textContent = student.progress_percent + "%";
   progressBox.append(percent);
   progressCell.append(progressBox);
 
-  // Сколько раз сдался
-  const gaveUpCell = document.createElement("td");
   gaveUpCell.className = "gaveup-cell";
   gaveUpCell.textContent = student.gave_up_count;
 
-  row.append(nameCell, gapCell, progressCell, gaveUpCell);
+  row.append(nameCell, topicCell, gapGradeCell, progressCell, gaveUpCell);
   return row;
 }
 
-// Карточка темы в блоке «Что западает у класса».
+// Одна строка показывает состояние одной темы у всего класса.
 function createTopicRow(topic) {
-  const card = document.createElement("div");
-  card.className = "class-topic";
-
-  // Тема западает у большинства — выделяем золотом:
-  // её стоит объяснить всему классу, не дожидаясь платформы.
+  const row = document.createElement("article");
+  const title = document.createElement("p");
+  const source = document.createElement("p");
+  const progressBox = document.createElement("div");
+  const percent = document.createElement("span");
+  const details = document.createElement("p");
   const isHot = topic.students_struggling > TEACHER_MOCK.students.length / 2;
-  if (isHot) card.classList.add("is-hot");
 
-  const titleLine = document.createElement("p");
-  titleLine.className = "class-topic-title";
-  titleLine.textContent = topic.title + " ";
-  const badge = document.createElement("span");
-  badge.className = "grade-badge";
-  badge.textContent = topic.grade + " класс";
-  titleLine.append(badge);
+  row.className = "class-topic";
+  title.className = "class-topic-title";
+  title.textContent = topic.title;
+  source.className = "class-topic-source";
+  source.textContent = topic.source_ref || "";
+
+  // Золотой цвет означает: с темой застряло больше половины класса.
   if (isHot) {
-    const hot = document.createElement("span");
-    hot.className = "hot-caption";
-    hot.textContent = "объяснить завтра";
-    titleLine.append(hot);
+    const caption = document.createElement("span");
+    caption.className = "hot-caption";
+    caption.textContent = "объяснить завтра";
+    row.classList.add("is-hot");
+    title.append(caption);
   }
 
-  const barBox = document.createElement("div");
-  barBox.className = "progress-box";
-  barBox.append(createBar(topic.avg_mastery, isHot ? "bar-gold" : "bar-accent"));
-  const percent = document.createElement("span");
+  progressBox.className = "progress-box";
+  progressBox.append(createProgressBar(topic.avg_mastery, isHot ? "bar-gold" : "bar-accent"));
   percent.className = "progress-percent";
   percent.textContent = topic.avg_mastery + "%";
-  barBox.append(percent);
+  progressBox.append(percent);
 
-  const detail = document.createElement("p");
-  detail.className = "class-topic-detail";
-  detail.textContent = topic.students_struggling + " учеников застряли · в среднем " +
+  details.className = "class-topic-detail";
+  details.textContent = topic.students_struggling + " учеников застряли · в среднем " +
     topic.avg_hints + " подсказок";
 
-  card.append(titleLine, barBox, detail);
-  return card;
+  row.append(title);
+  if (topic.source_ref) row.append(source);
+  row.append(progressBox, details);
+  return row;
 }
 
-// «Добавить тему»: новая карточка появляется в блоке выше.
-// Данные никуда не сохраняются — это работает только на этой странице.
+// Новая тема существует только в DOM: после обновления страницы она исчезнет.
 function addTopic(event) {
-  event.preventDefault(); // не перезагружать страницу
+  event.preventDefault();
 
-  const title = document.getElementById("add-title").value.trim();
-  const source = document.getElementById("add-source").value.trim();
-  if (title === "" || source === "") return;
+  const titleInput = document.getElementById("add-title");
+  const sourceInput = document.getElementById("add-source");
+  const title = titleInput.value.trim();
+  const source = sourceInput.value.trim();
+
+  if (title === "" || source === "") {
+    window.alert("Заполните тему и источник.");
+    return;
+  }
 
   const topic = {
-    // Источник показываем в скобках после названия: у новой темы
-    // ещё нет статистики, но откуда она — учитель видит сразу.
-    title: title + " (" + source + ")",
+    title: title,
     grade: Number(document.getElementById("add-grade").value),
+    source_ref: source,
     avg_mastery: 0,
     students_struggling: 0,
     avg_hints: 0,
