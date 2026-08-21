@@ -33,6 +33,17 @@ if (profile && profile.name) {
   profileLine.classList.remove("is-hidden");
 }
 
+// В интерфейсе показываем только параграф, без страницы: у разных изданий
+// учебника страницы разные, а параграф один и тот же.
+// «Математика, 5 класс, часть 1, §23, стр. 112» -> «Математика, 5 класс, часть 1, §23».
+function paragraphOnly(sourceRef) {
+  const index = sourceRef.indexOf(", стр.");
+  if (index === -1) {
+    return sourceRef;
+  }
+  return sourceRef.slice(0, index);
+}
+
 // Пауза на нужное число миллисекунд. Нужна, чтобы ученик успел увидеть,
 // верно он ответил или нет, прежде чем появится следующий вопрос.
 function wait(ms) {
@@ -173,7 +184,7 @@ function showResult(result) {
     resultText.textContent =
       'Начинаем не с темы "' + firstTopic.title + '", а с темы "' + root.title + '"' + tail;
   }
-  resultSource.textContent = "источник — " + root.source_ref;
+  resultSource.textContent = "источник — " + paragraphOnly(root.source_ref);
 }
 
 // --- Запуск и перезапуск -------------------------------------------------
