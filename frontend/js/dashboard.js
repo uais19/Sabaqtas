@@ -32,6 +32,15 @@ function renderProfileLines() {
     goalLine.textContent = "Цель: " + label;
     goalLine.classList.remove("is-hidden");
   }
+
+  // Пояснение под целью: как она связана с планом «снизу вверх».
+  // Свой независимый страж: нет текста — строка остаётся скрытой.
+  const note = goalNote(profile.goal);
+  if (note) {
+    const goalNoteLine = document.getElementById("goal-note");
+    goalNoteLine.textContent = note;
+    goalNoteLine.classList.remove("is-hidden");
+  }
 }
 
 // --- Общие мелочи ------------------------------------------------------------
