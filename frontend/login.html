@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вход — Sabaqtas</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Экран работает целиком в браузере: ни mock.js, ни api.js не нужны -->
+  <script src="js/login.js" defer></script>
+</head>
+<body>
+
+  <!-- Простая шапка: только логотип -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="wordmark" href="index.html">Sabaqtas</a>
+    </div>
+  </header>
+
+  <main class="container page-narrow">
+
+    <h1 class="page-title">Начнём знакомство</h1>
+    <p class="page-subtitle">
+      Расскажи немного о себе — и диагностика подстроится под тебя.
+    </p>
+
+    <!-- ===== АНКЕТА ===== -->
+    <form class="login-form" id="login-form">
+
+      <div class="teacher-form-field">
+        <label for="login-name">Имя</label>
+        <input class="add-input" id="login-name" type="text" required>
+      </div>
+
+      <div class="teacher-form-field">
+        <label for="login-pass">Пароль</label>
+        <input class="add-input" id="login-pass" type="password" minlength="4" required>
+      </div>
+
+      <div class="teacher-form-field">
+        <label for="login-grade">Класс</label>
+        <select class="add-input" id="login-grade">
+          <option value="5">5 класс</option>
+          <option value="6">6 класс</option>
+          <option value="7">7 класс</option>
+          <option value="8" selected>8 класс</option>
+          <option value="9">9 класс</option>
+          <option value="10">10 класс</option>
+          <option value="11">11 класс</option>
+        </select>
+      </div>
+
+      <div class="teacher-form-field">
+        <label for="login-subject">Предмет</label>
+        <!-- Физика и химия выключены: у диагностики пока есть данные только
+             по математике. Включённая «Физика» показала бы математические
+             вопросы под физической вывеской — заметная ложь на демо. -->
+        <select class="add-input" id="login-subject">
+          <option value="Математика" selected>Математика</option>
+          <option value="Физика" disabled>Физика — скоро</option>
+          <option value="Химия" disabled>Химия — скоро</option>
+        </select>
+      </div>
+
+      <div class="teacher-form-field">
+        <label for="login-goal">Цель</label>
+        <select class="add-input" id="login-goal">
+          <option value="gaps" selected>Закрыть пробелы за прошлые годы</option>
+          <option value="current">Подтянуть текущую тему</option>
+          <option value="ent">Подготовка к ЕНТ</option>
+        </select>
+      </div>
+
+      <button class="button button-primary" type="submit">Начать</button>
+
+    </form>
+
+    <!-- Сообщение о том, что заполнено не так. Пустое и скрытое, пока всё хорошо. -->
+    <p class="error-message is-hidden" id="error"></p>
+
+    <!-- ===== ДЕМО-ВХОД =====
+         Для жюри: два готовых аккаунта, чтобы посмотреть продукт
+         без заполнения анкеты. -->
+    <section class="demo-entry" aria-label="Демо-вход">
+      <p class="demo-entry-note">Или открой готовый аккаунт и просто посмотри продукт:</p>
+      <div class="demo-entry-buttons">
+        <button class="button button-secondary" type="button" id="demo-student">Посмотреть как ученик</button>
+        <button class="button button-secondary" type="button" id="demo-teacher">Посмотреть как учитель</button>
+      </div>
+    </section>
+
+  </main>
+
+</body>
+</html>
