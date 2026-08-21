@@ -310,15 +310,19 @@ async function send() {
 
 // --- Переключатели ---
 
-function setMode(newMode) {
-  if (newMode === mode) return;
-  mode = newMode;
-
+// Показываем текущий режим на кнопках и в подсказках. Ленту не трогаем.
+function paintMode() {
   modeButtons.forEach(function (button) {
     button.classList.toggle("is-active", button.dataset.mode === mode);
   });
   modeHint.textContent = MODE_HINTS[mode];
   input.placeholder = MODE_PLACEHOLDERS[mode];
+}
+
+function setMode(newMode) {
+  if (newMode === mode) return;
+  mode = newMode;
+  paintMode();
 
   // Новый режим — новый разговор: у режимов разные правила,
   // и старая история только запутает наставника.
@@ -355,3 +359,20 @@ input.addEventListener("keydown", function (event) {
     send();
   }
 });
+
+// --- Режим из адреса страницы ---
+
+// С экрана заданий ученик попадает сюда по ссылке chat.html?mode=mentor —
+// после неудачной попытки решить задачу. Включаем режим наставника сразу,
+// чтобы он не искал переключатель руками.
+// setMode здесь не годится: он чистит ленту и пишет «Режим изменён»,
+// а лента на только что открытой странице и так пустая.
+function applyModeFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("mode") === "mentor") {
+    mode = "mentor";
+    paintMode();
+  }
+}
+
+applyModeFromUrl();

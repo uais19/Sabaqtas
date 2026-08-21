@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Мой план — Sabaqtas</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Порядок важен: mock.js готовит данные, dashboard.js их рисует.
+       defer сохраняет этот порядок. -->
+  <script src="js/mock.js" defer></script>
+  <script src="js/dashboard.js" defer></script>
+</head>
+<body>
+
+  <!-- Простая шапка: логотип и название экрана -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="wordmark" href="index.html">Sabaqtas</a>
+      <p class="header-title">Мой план</p>
+    </div>
+  </header>
+
+  <main class="container dash-page">
+
+    <!-- ===== БЛОК 1: корневой пробел =====
+         Самый заметный блок страницы: с него начинается весь план. -->
+    <section class="root-gap" aria-labelledby="root-gap-label">
+      <p class="root-gap-label" id="root-gap-label">Твой корневой пробел:</p>
+      <h1 class="root-gap-title" id="root-title"></h1>
+      <p class="root-gap-source" id="root-source"></p>
+      <p class="root-gap-note">Пока не закроем эту тему, остальное решать бесполезно.</p>
+    </section>
+
+    <!-- ===== БЛОК 2: план обучения ===== -->
+    <section class="dash-section" aria-labelledby="plan-heading">
+      <h2 class="dash-heading" id="plan-heading">План обучения</h2>
+      <p class="dash-subheading">Снизу вверх: от корневого пробела до темы твоего класса.</p>
+      <!-- Строки плана создаёт dashboard.js -->
+      <ol class="plan-list" id="plan-list"></ol>
+    </section>
+
+    <!-- ===== БЛОК 3: прогресс ===== -->
+    <section class="dash-section" aria-labelledby="progress-heading">
+      <h2 class="dash-heading" id="progress-heading">Прогресс</h2>
+      <div class="tiles">
+        <article class="tile">
+          <p class="tile-number" id="tile-points"></p>
+          <p class="tile-label">Очки</p>
+        </article>
+        <article class="tile">
+          <p class="tile-number" id="tile-streak"></p>
+          <p class="tile-label">Серия дней</p>
+        </article>
+        <article class="tile">
+          <p class="tile-number" id="tile-closed"></p>
+          <p class="tile-label">Закрыто пробелов</p>
+        </article>
+      </div>
+      <!-- Значки достижений создаёт dashboard.js -->
+      <ul class="badge-list" id="badge-list"></ul>
+    </section>
+
+    <!-- ===== БЛОК 4: слабые места ===== -->
+    <section class="dash-section" aria-labelledby="weak-heading">
+      <h2 class="dash-heading" id="weak-heading">Слабые места</h2>
+      <p class="dash-subheading">Что диагностика отметила как непрочное.</p>
+      <ul class="weak-list" id="weak-list"></ul>
+    </section>
+
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Тема и задания — Sabaqtas</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Порядок важен: mock.js готовит данные, topic.js их рисует. -->
+  <script src="js/mock.js" defer></script>
+  <script src="js/topic.js" defer></script>
+</head>
+<body>
+
+  <!-- Шапка: логотип и возврат к плану -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="wordmark" href="index.html">Sabaqtas</a>
+      <a class="header-link" href="dashboard.html">К плану</a>
+    </div>
+  </header>
+
+  <main class="container page-narrow topic-page">
+
+    <!-- ===== ЗАГОЛОВОК ТЕМЫ ===== -->
+    <section class="topic-header">
+      <h1 class="topic-title" id="topic-title"></h1>
+      <p class="topic-meta">
+        <span class="grade-badge" id="topic-grade"></span>
+        <span class="topic-source" id="topic-source"></span>
+      </p>
+    </section>
+
+    <!-- ===== МАТЕРИАЛ =====
+         Правило прямо из учебника. Плашка источника под ним — тот же
+         элемент, что и в чате: ученик должен узнавать его на всех экранах. -->
+    <section class="material-card" aria-labelledby="material-heading">
+      <h2 class="material-heading" id="material-heading">Правило из учебника</h2>
+      <p class="material-text" id="material-text"></p>
+      <div class="msg-sources">
+        <span class="source-badge" id="material-source"></span>
+      </div>
+    </section>
+
+    <!-- ===== ЗАДАНИЯ =====
+         Показываем по одному заданию за раз. -->
+    <section id="tasks" aria-labelledby="task-progress">
+      <p class="task-progress" id="task-progress"></p>
+      <div class="question-card">
+        <p class="question-text" id="task-text"></p>
+        <!-- Варианты ответа создаёт topic.js -->
+        <div class="answers" id="task-answers"></div>
+        <!-- Разбор ответа: подсказка или объяснение. Появляется после клика. -->
+        <div id="task-feedback"></div>
+      </div>
+    </section>
+
+    <!-- ===== ИТОГ =====
+         Показывается только после третьего задания. -->
+    <section class="is-hidden" id="summary">
+      <div class="result-card">
+        <p class="result-text" id="summary-text"></p>
+        <p class="result-source" id="summary-detail"></p>
+        <div class="summary-actions">
+          <a class="button button-primary" href="dashboard.html">Вернуться к плану</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+</body>
+</html>
