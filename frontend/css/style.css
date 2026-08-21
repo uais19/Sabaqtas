@@ -2155,3 +2155,18 @@ h1 {
   max-width: 60ch;
   margin-top: 4px;
 }
+
+/* --- Логотип-лесенка --- */
+
+/* Логотип — значок и слово в одну строку, по центру по вертикали.
+   inline-flex, а не flex: ссылка остаётся строчной и не ломает шапку. */
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Значок не сжимается, когда в шапке тесно */
+.wordmark-mark {
+  flex-shrink: 0;
+}
