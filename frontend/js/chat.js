@@ -172,6 +172,11 @@ async function send() {
     const data = await response.json();
     typing.remove();
 
+    // Какая модель ответила — только в консоль, ученику это не нужно.
+    if (data.model) {
+      console.log("Ответила модель: " + data.model);
+    }
+
     // found: false — честный отказ, рисуем спокойно и без источников.
     addBubble("ai", data.answer, data.found === false);
 
