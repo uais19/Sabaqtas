@@ -117,6 +117,96 @@ function addTyping() {
   return typing;
 }
 
+// Тихая пометка под ответом, который взяли из кэша, а не спросили заново.
+function addCacheNote() {
+  const note = document.createElement("p");
+  note.className = "msg-cache-note";
+  note.textContent = "из сохранённых ответов";
+  messagesBox.append(note);
+  scrollToBottom();
+}
+
+// Ответ ИИ целиком: пузырь, плашка источников и пометка о кэше.
+// Одна функция на оба случая — свежий ответ и ответ из кэша выглядят
+// одинаково, отличает их только тихая строчка снизу.
+function showAnswer(data, fromCache) {
+  // found: false — честный отказ, рисуем спокойно и без источников.
+  addBubble("ai", data.answer, data.found === false);
+
+  // Плашку источника рисуем только когда источники реально есть.
+  if (Array.isArray(data.sources) && data.sources.length > 0) {
+    addSourceBadge(data.sources);
+  }
+
+  if (fromCache) {
+    addCacheNote();
+  }
+}
+
+// --- Кэш ответов в браузере ---
+//
+// Кэш экономит дневную квоту и делает демо устойчивым — на сцене повторный
+// вопрос отвечается мгновенно и без обращения к API. Бесплатный тариф даёт
+// всего 20 генераций в день на каждую модель, поэтому каждый сэкономленный
+// запрос на счету.
+//
+// Храним в localStorage простым списком: новые ответы в конце, старые
+// в начале. Так «выбросить самый старый» — это просто снять первый элемент.
+
+const CACHE_STORAGE_KEY = "sabaqtas-answers";
+const CACHE_LIMIT = 100;
+
+// Ключ — всё, что меняет ответ: сам вопрос, режим, язык и класс.
+// Вопрос приводим к нижнему регистру и обрезаем пробелы, чтобы
+// «Что такое дробь?» и «что такое дробь? » считались одним вопросом.
+function cacheKey(question, mode, lang, grade) {
+  return question.trim().toLowerCase() + "|" + mode + "|" + lang + "|" + grade;
+}
+
+// Любое обращение к localStorage обёрнуто в try/catch: в приватном режиме
+// браузера он бросает исключение, а место в нём может кончиться. Кэш —
+// приятное дополнение, экран из-за него падать не должен.
+function readCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_STORAGE_KEY);
+    const list = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list) ? list : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function writeCache(list) {
+  try {
+    localStorage.setItem(CACHE_STORAGE_KEY, JSON.stringify(list));
+  } catch (error) {
+    // Запись запрещена или кончилось место — просто работаем без кэша.
+    console.log("Кэш ответов недоступен: " + error.message);
+  }
+}
+
+// Ответ из кэша или null, если такого вопроса ещё не было.
+function cacheGet(key) {
+  const found = readCache().find(function (item) {
+    return item.key === key;
+  });
+  return found ? found.data : null;
+}
+
+function cacheSet(key, data) {
+  // Старую запись с тем же ключом убираем, чтобы ответ не задвоился.
+  const list = readCache().filter(function (item) {
+    return item.key !== key;
+  });
+  list.push({ key: key, data: data });
+
+  // Список переполнен — самые старые уходят с начала.
+  while (list.length > CACHE_LIMIT) {
+    list.shift();
+  }
+  writeCache(list);
+}
+
 // --- Отправка вопроса ---
 
 async function send() {
@@ -142,9 +232,22 @@ async function send() {
     body.history = conversation.slice();
   }
 
+  const key = cacheKey(question, mode, lang, body.grade);
+
   const typing = addTyping();
 
   try {
+    // Этот вопрос уже спрашивали — отвечаем из кэша, в сеть не идём
+    // и дневную квоту Gemini не тратим.
+    const cached = cacheGet(key);
+    if (cached) {
+      typing.remove();
+      showAnswer(cached, true);
+      conversation.push({ role: "user", text: question });
+      conversation.push({ role: "ai", text: cached.answer });
+      return;
+    }
+
     const response = await fetch("/api/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -172,13 +275,21 @@ async function send() {
     const data = await response.json();
     typing.remove();
 
-    // found: false — честный отказ, рисуем спокойно и без источников.
-    addBubble("ai", data.answer, data.found === false);
-
-    // Плашку источника рисуем только когда источники реально есть.
-    if (Array.isArray(data.sources) && data.sources.length > 0) {
-      addSourceBadge(data.sources);
+    // Какая модель ответила — только в консоль, ученику это не нужно.
+    if (data.model) {
+      console.log("Ответила модель: " + data.model);
     }
+
+    showAnswer(data, false);
+
+    // В кэш кладём только состоявшийся ответ: сбои и ошибки квоты сюда
+    // не доходят, они уходят в catch. А честное «этого нет в учебниках» —
+    // настоящий результат, его кэшируем наравне с обычным ответом.
+    cacheSet(key, {
+      answer: data.answer,
+      found: data.found,
+      sources: data.sources
+    });
 
     // В историю попадают только состоявшиеся вопрос и ответ.
     conversation.push({ role: "user", text: question });
@@ -188,24 +299,30 @@ async function send() {
     // иначе общее спокойное сообщение.
     typing.remove();
     addSystemLine(error.serverText || "Не получилось связаться с сервером. Попробуй ещё раз");
+  } finally {
+    // finally, а не просто хвост функции: из ветки с кэшем мы выходим
+    // через return, а разблокировать ввод нужно в любом случае.
+    isWaiting = false;
+    sendButton.disabled = false;
+    input.focus();
   }
-
-  isWaiting = false;
-  sendButton.disabled = false;
-  input.focus();
 }
 
 // --- Переключатели ---
 
-function setMode(newMode) {
-  if (newMode === mode) return;
-  mode = newMode;
-
+// Показываем текущий режим на кнопках и в подсказках. Ленту не трогаем.
+function paintMode() {
   modeButtons.forEach(function (button) {
     button.classList.toggle("is-active", button.dataset.mode === mode);
   });
   modeHint.textContent = MODE_HINTS[mode];
   input.placeholder = MODE_PLACEHOLDERS[mode];
+}
+
+function setMode(newMode) {
+  if (newMode === mode) return;
+  mode = newMode;
+  paintMode();
 
   // Новый режим — новый разговор: у режимов разные правила,
   // и старая история только запутает наставника.
@@ -242,3 +359,20 @@ input.addEventListener("keydown", function (event) {
     send();
   }
 });
+
+// --- Режим из адреса страницы ---
+
+// С экрана заданий ученик попадает сюда по ссылке chat.html?mode=mentor —
+// после неудачной попытки решить задачу. Включаем режим наставника сразу,
+// чтобы он не искал переключатель руками.
+// setMode здесь не годится: он чистит ленту и пишет «Режим изменён»,
+// а лента на только что открытой странице и так пустая.
+function applyModeFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("mode") === "mentor") {
+    mode = "mentor";
+    paintMode();
+  }
+}
+
+applyModeFromUrl();
