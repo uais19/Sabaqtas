@@ -307,6 +307,20 @@ function historyToContents(history) {
     });
 }
 
+// Тема диалога задана первым вопросом ученика. Со второго шага вопрос —
+// это короткая реплика («не знаю», «да»), не похожая ни на один кусок
+// учебника: порог отсёк бы её раньше, чем наставник успел ответить.
+function firstUserQuestion(history) {
+  if (!Array.isArray(history)) {
+    return "";
+  }
+  const found = history.find(function (message) {
+    return message && message.role === "user" &&
+           typeof message.text === "string" && message.text.trim() !== "";
+  });
+  return found ? found.text.trim() : "";
+}
+
 // --- Обработчик запроса ----------------------------------------------------------
 
 module.exports = async function handler(req, res) {
@@ -329,10 +343,11 @@ module.exports = async function handler(req, res) {
   const lang = body.lang === "kk" ? "kk" : "ru";
   const grade = Number(body.grade) || 9;
 
-  // То же правило, что и на клиенте: кэшируем только первую реплику
-  // диалога. Дальше ответ зависит от истории, а её в ключе нет.
   const history = body.history;
-  const cacheable = !Array.isArray(history) || history.length === 0;
+  const hasHistory = Array.isArray(history) && history.length > 0;
+  // Кэшируем только первую реплику диалога. Дальше ответ зависит от истории,
+  // а её в ключе нет — вернули бы ответ на другой вопрос.
+  const cacheable = !hasHistory;
 
   // Проверяем вопрос: непустая строка не длиннее 1000 символов.
   if (typeof question !== "string" || question.trim() === "") {
@@ -343,6 +358,14 @@ module.exports = async function handler(req, res) {
       error: "Вопрос длиннее " + MAX_QUESTION_LENGTH + " символов"
     });
   }
+
+  // По этому тексту ищем фрагменты учебника и считаем порог. В первой
+  // реплике это сам вопрос. Дальше — первый вопрос диалога: тему задал он,
+  // и порог он уже прошёл. Если истории нет или она битая — берём текущий
+  // вопрос, поведение как раньше.
+  const retrievalText = hasHistory
+    ? (firstUserQuestion(history) || question.trim())
+    : question.trim();
 
   // Шаг 0: кэш. Если такой вопрос уже отвечали, отдаём готовый ответ
   // и не трогаем Gemini вообще — ни эмбеддинг, ни генерацию.
@@ -355,7 +378,8 @@ module.exports = async function handler(req, res) {
 
   try {
     // Шаг 1: вопрос -> вектор.
-    const questionVector = await embedQuestion(question.trim(), apiKey);
+    const questionVector = await embedQuestion(retrievalText, apiKey);
+    console.log("Поиск по тексту: " + retrievalText);
 
     // Шаг 2: похожесть вопроса на каждый кусок учебника.
     const scored = CHUNKS.map(function (chunk) {
