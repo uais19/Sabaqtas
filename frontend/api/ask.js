@@ -329,6 +329,11 @@ module.exports = async function handler(req, res) {
   const lang = body.lang === "kk" ? "kk" : "ru";
   const grade = Number(body.grade) || 9;
 
+  // То же правило, что и на клиенте: кэшируем только первую реплику
+  // диалога. Дальше ответ зависит от истории, а её в ключе нет.
+  const history = body.history;
+  const cacheable = !Array.isArray(history) || history.length === 0;
+
   // Проверяем вопрос: непустая строка не длиннее 1000 символов.
   if (typeof question !== "string" || question.trim() === "") {
     return res.status(400).json({ error: "Поле question должно быть непустой строкой" });
@@ -342,7 +347,7 @@ module.exports = async function handler(req, res) {
   // Шаг 0: кэш. Если такой вопрос уже отвечали, отдаём готовый ответ
   // и не трогаем Gemini вообще — ни эмбеддинг, ни генерацию.
   const key = cacheKey(question, mode, lang, grade);
-  const cached = ANSWER_CACHE.get(key);
+  const cached = cacheable ? ANSWER_CACHE.get(key) : undefined;
   if (cached) {
     console.log("Ответ из кэша: " + key);
     return res.status(200).json(cached);
@@ -417,7 +422,9 @@ module.exports = async function handler(req, res) {
         sources: [],
         model: generated.model
       };
-      saveToCache(key, refusal);
+      if (cacheable) {
+        saveToCache(key, refusal);
+      }
       return res.status(200).json(refusal);
     }
 
@@ -445,7 +452,9 @@ module.exports = async function handler(req, res) {
 
     // В кэш попадают только состоявшиеся ответы. Сбои, ошибки квоты и
     // отказы из-за ошибок сюда не доходят — они уходят в catch ниже.
-    saveToCache(key, payload);
+    if (cacheable) {
+      saveToCache(key, payload);
+    }
     return res.status(200).json(payload);
   } catch (error) {
     // Логируем причину на сервере, наружу отдаём общий текст без деталей:

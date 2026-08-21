@@ -234,12 +234,16 @@ async function send() {
 
   const key = cacheKey(question, mode, lang, body.grade);
 
+  // Кэшируем только первую реплику диалога. Дальше ответ зависит от истории,
+  // а её в ключе нет — вернули бы ответ на другой вопрос.
+  const cacheable = conversation.length === 0;
+
   const typing = addTyping();
 
   try {
     // Этот вопрос уже спрашивали — отвечаем из кэша, в сеть не идём
     // и дневную квоту Gemini не тратим.
-    const cached = cacheGet(key);
+    const cached = cacheable ? cacheGet(key) : null;
     if (cached) {
       typing.remove();
       showAnswer(cached, true);
@@ -285,11 +289,13 @@ async function send() {
     // В кэш кладём только состоявшийся ответ: сбои и ошибки квоты сюда
     // не доходят, они уходят в catch. А честное «этого нет в учебниках» —
     // настоящий результат, его кэшируем наравне с обычным ответом.
-    cacheSet(key, {
-      answer: data.answer,
-      found: data.found,
-      sources: data.sources
-    });
+    if (cacheable) {
+      cacheSet(key, {
+        answer: data.answer,
+        found: data.found,
+        sources: data.sources
+      });
+    }
 
     // В историю попадают только состоявшиеся вопрос и ответ.
     conversation.push({ role: "user", text: question });
