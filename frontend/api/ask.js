@@ -62,6 +62,41 @@ try {
   console.error("Не удалось загрузить chunks.json: " + error.message);
 }
 
+// --- Кэш ответов -------------------------------------------------------------
+
+// Кэш экономит дневную квоту и делает демо устойчивым — на сцене повторный
+// вопрос отвечается мгновенно и без обращения к API. Бесплатный тариф даёт
+// всего 20 генераций в день на каждую модель, поэтому каждый сэкономленный
+// запрос на счету.
+//
+// Map лежит вне обработчика — на уровне модуля. Vercel переиспользует
+// «тёплый» процесс между вызовами, поэтому кэш живёт от запроса к запросу
+// и работает сразу на всех: если один зритель спросил про дроби, второй
+// получит ответ мгновенно. Холодный старт кэш обнуляет, и это нормально:
+// это ускорение, а не хранилище, терять тут нечего.
+const ANSWER_CACHE = new Map();
+
+// Сколько ответов держим. Больше не нужно: демо столько не наспрашивает,
+// а память функции не резиновая.
+const CACHE_LIMIT = 200;
+
+// Ключ — всё, что меняет ответ: сам вопрос, режим, язык и класс.
+// Вопрос приводим к нижнему регистру и обрезаем пробелы, чтобы
+// «Что такое дробь?» и «что такое дробь? » считались одним вопросом.
+function cacheKey(question, mode, lang, grade) {
+  return question.trim().toLowerCase() + "|" + mode + "|" + lang + "|" + grade;
+}
+
+// Кладём ответ в кэш и выбрасываем самые старые, если их стало слишком много.
+function saveToCache(key, payload) {
+  ANSWER_CACHE.set(key, payload);
+  // Map помнит порядок добавления, поэтому первый ключ — самый старый.
+  while (ANSWER_CACHE.size > CACHE_LIMIT) {
+    const oldest = ANSWER_CACHE.keys().next().value;
+    ANSWER_CACHE.delete(oldest);
+  }
+}
+
 // --- Работа с векторами ------------------------------------------------------
 
 // Приводим вектор к длине 1. Векторы в chunks.json уже нормированы,
@@ -304,6 +339,15 @@ module.exports = async function handler(req, res) {
     });
   }
 
+  // Шаг 0: кэш. Если такой вопрос уже отвечали, отдаём готовый ответ
+  // и не трогаем Gemini вообще — ни эмбеддинг, ни генерацию.
+  const key = cacheKey(question, mode, lang, grade);
+  const cached = ANSWER_CACHE.get(key);
+  if (cached) {
+    console.log("Ответ из кэша: " + key);
+    return res.status(200).json(cached);
+  }
+
   try {
     // Шаг 1: вопрос -> вектор.
     const questionVector = await embedQuestion(question.trim(), apiKey);
@@ -323,12 +367,15 @@ module.exports = async function handler(req, res) {
     // в учебниках ответа нет. Модель не вызываем вовсе:
     // это гарантия в коде, а не просьба к модели.
     if (topScore < SIMILARITY_THRESHOLD) {
-      return res.status(200).json({
+      // Это настоящий результат, а не сбой: кэшируем наравне с ответом.
+      const missing = {
         answer: "Этого нет в загруженных учебниках.",
         found: false,
         topScore: Number(topScore.toFixed(3)),
         sources: []
-      });
+      };
+      saveToCache(key, missing);
+      return res.status(200).json(missing);
     }
 
     // Для ответа берём только куски, прошедшие порог.
@@ -363,13 +410,15 @@ module.exports = async function handler(req, res) {
     const lowerAnswer = answer.toLowerCase();
     if (lowerAnswer.includes("нет в загруженных учебниках") ||
         lowerAnswer.includes("загруженных материалах этой темы нет")) {
-      return res.status(200).json({
+      const refusal = {
         answer: answer,
         found: false,
         topScore: Number(topScore.toFixed(3)),
         sources: [],
         model: generated.model
-      });
+      };
+      saveToCache(key, refusal);
+      return res.status(200).json(refusal);
     }
 
     // Источники: из каких мест учебника собран ответ.
@@ -385,14 +434,19 @@ module.exports = async function handler(req, res) {
       };
     });
 
-    return res.status(200).json({
+    const payload = {
       answer: answer,
       found: true,
       topScore: Number(topScore.toFixed(3)),
       sources: sources,
       // Какая модель ответила. Нужно нам для консоли, ученику не показываем.
       model: generated.model
-    });
+    };
+
+    // В кэш попадают только состоявшиеся ответы. Сбои, ошибки квоты и
+    // отказы из-за ошибок сюда не доходят — они уходят в catch ниже.
+    saveToCache(key, payload);
+    return res.status(200).json(payload);
   } catch (error) {
     // Логируем причину на сервере, наружу отдаём общий текст без деталей:
     // сырая ошибка Gemini не должна доходить до клиента.
