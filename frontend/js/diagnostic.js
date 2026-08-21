@@ -21,6 +21,18 @@ const resultText = document.getElementById("result-text");
 const resultSource = document.getElementById("result-source");
 const errorBox = document.getElementById("error");
 
+// --- Строка из анкеты ---
+// Девятиклассника проверяем на материале 8 класса — это продукт работает
+// правильно, а не перепутал класс. Строка с именем говорит это явно.
+// Профиля может не быть (страницу открыли по прямой ссылке) — тогда
+// строка просто остаётся скрытой.
+const profile = readProfile();
+if (profile && profile.name) {
+  const profileLine = document.getElementById("profile-line");
+  profileLine.textContent = profile.name + ", начинаем с базы за 8 класс";
+  profileLine.classList.remove("is-hidden");
+}
+
 // Пауза на нужное число миллисекунд. Нужна, чтобы ученик успел увидеть,
 // верно он ответил или нет, прежде чем появится следующий вопрос.
 function wait(ms) {

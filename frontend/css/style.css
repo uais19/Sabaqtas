@@ -2130,3 +2130,18 @@ h1 {
     text-align: center;
   }
 }
+
+/* Личная строка из анкеты (имя на диагностике, цель в кабинете) —
+   тише подзаголовка, тем же приглушённым цветом */
+.profile-line {
+  color: var(--muted);
+  font-size: 15px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* В кабинете строка цели стоит под левым подзаголовком, не по центру */
+.dash-section .profile-line {
+  text-align: left;
+  margin-top: 4px;
+}

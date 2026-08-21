@@ -6,10 +6,32 @@
 // Комментарии подробные — код должен объясняться по строкам.
 
 function renderDashboard() {
+  renderProfileLines();
   renderRootGap();
   renderPlan();
   renderProgress();
   renderWeakSpots();
+}
+
+// --- Имя и цель из анкеты ---
+// Профиля может не быть: страницу открыли по прямой ссылке. Тогда шапка
+// остаётся «Мой план», а строка цели — скрытой. Ничего не ломается.
+function renderProfileLines() {
+  const profile = readProfile();
+  if (!profile) {
+    return;
+  }
+
+  if (profile.name) {
+    document.getElementById("header-title").textContent = "Мой план — " + profile.name;
+  }
+
+  const label = goalLabel(profile.goal);
+  if (label) {
+    const goalLine = document.getElementById("goal-line");
+    goalLine.textContent = "Цель: " + label;
+    goalLine.classList.remove("is-hidden");
+  }
 }
 
 // --- Общие мелочи ------------------------------------------------------------

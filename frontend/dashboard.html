@@ -8,6 +8,7 @@
   <!-- Порядок важен: mock.js готовит данные, dashboard.js их рисует.
        defer сохраняет этот порядок. -->
   <script src="js/mock.js" defer></script>
+  <script src="js/profile.js" defer></script>
   <script src="js/dashboard.js" defer></script>
 </head>
 <body>
@@ -16,7 +17,7 @@
   <header class="site-header">
     <div class="container header-inner">
       <a class="wordmark" href="index.html">Sabaqtas</a>
-      <p class="header-title">Мой план</p>
+      <p class="header-title" id="header-title">Мой план</p>
     </div>
   </header>
 
@@ -35,6 +36,8 @@
     <section class="dash-section" aria-labelledby="plan-heading">
       <h2 class="dash-heading" id="plan-heading">План обучения</h2>
       <p class="dash-subheading">Снизу вверх: от корневого пробела до темы твоего класса.</p>
+      <!-- Цель из анкеты. Пустая и скрытая, пока профиля нет. -->
+      <p class="profile-line is-hidden" id="goal-line"></p>
       <!-- Строки плана создаёт dashboard.js -->
       <ol class="plan-list" id="plan-list"></ol>
     </section>
