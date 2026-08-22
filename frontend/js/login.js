@@ -12,6 +12,7 @@ const gradeSelect = document.getElementById("login-grade");
 const subjectSelect = document.getElementById("login-subject");
 const levelSelect = document.getElementById("login-level");
 const goalSelect = document.getElementById("login-goal");
+const deadlineInput = document.getElementById("login-deadline");
 const errorBox = document.getElementById("error");
 
 // --- Сообщение об ошибке ---
@@ -94,10 +95,22 @@ async function submitForm(event) {
     subject: subjectSelect.value,
     level: levelSelect.value,
     goal: goalSelect.value,
+    // Поле type="date" само отдаёт либо "YYYY-MM-DD", либо пустую строку,
+    // если дату не ввели. Дополнительно ничего не проверяем.
+    deadline: deadlineInput.value,
     role: "student"
   });
 
   window.location.href = "diagnostic.html";
+}
+
+// Дата -> строка "YYYY-MM-DD", в том же виде, в каком её отдаёт поле
+// type="date". Месяц и день дополняем нулём слева: "2027-04-05", а не "2027-4-5".
+function toDateString(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return year + "-" + month + "-" + day;
 }
 
 // --- Демо-вход ---
@@ -105,6 +118,11 @@ async function submitForm(event) {
 // Готовые аккаунты для жюри. passHash пустой намеренно: у демо-профиля
 // нет пароля, хешировать нечего.
 function enterAsStudent() {
+  // Демо-аккаунту дату считаем от сегодняшнего дня, а не зашиваем: иначе
+  // через полгода в демо будет дата в прошлом.
+  const demoDeadline = new Date();
+  demoDeadline.setMonth(demoDeadline.getMonth() + 8);
+
   saveProfile({
     name: "Айгерим",
     passHash: "",
@@ -112,6 +130,7 @@ function enterAsStudent() {
     subject: "Математика",
     level: "medium",
     goal: "gaps",
+    deadline: toDateString(demoDeadline),
     role: "student"
   });
   // Ученик начинает с диагностики: жюри проходит весь путь и видит
@@ -127,6 +146,7 @@ function enterAsTeacher() {
     subject: "Математика",
     level: "",
     goal: "",
+    deadline: "",
     role: "teacher"
   });
   window.location.href = "teacher.html";

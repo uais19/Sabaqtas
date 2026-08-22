@@ -51,6 +51,20 @@ function renderProfileLines() {
     levelLine.textContent = "Уровень на старте: " + level;
     levelLine.classList.remove("is-hidden");
   }
+
+  // Ближайшая цель: обратный отсчёт до даты из анкеты. Даты может не быть
+  // (поле необязательное), она может быть битой или уже прошедшей — во всех
+  // этих случаях daysUntil вернёт null, и раздел целиком остаётся скрытым.
+  const days = daysUntil(profile.deadline);
+  if (days !== null) {
+    // Если цель не указана или код неизвестен, пишем просто «Цель».
+    const goalName = goalLabel(profile.goal) || "Цель";
+    document.getElementById("deadline-line").textContent =
+      goalName + ": осталось " + days + " " + daysWord(days);
+    document.getElementById("deadline-note").textContent =
+      "Дата: " + formatLongDate(profile.deadline);
+    document.getElementById("deadline-section").classList.remove("is-hidden");
+  }
 }
 
 // --- Общие мелочи ------------------------------------------------------------
@@ -70,6 +84,33 @@ function paragraphOnly(sourceRef) {
 function formatDate(isoDate) {
   const parts = isoDate.split("-");
   return parts[2] + "." + parts[1] + "." + parts[0];
+}
+
+// Месяцы в родительном падеже — для даты вида «15 июня 2027».
+// Свой список, а не toLocaleDateString: тот в разных браузерах даёт разный вывод.
+const MONTHS_GENITIVE = [
+  "января", "февраля", "марта", "апреля", "мая", "июня",
+  "июля", "августа", "сентября", "октября", "ноября", "декабря"
+];
+
+// «2027-06-15» -> «15 июня 2027». Число без ведущего нуля: «5 мая», а не «05 мая».
+// Сюда попадает только строка, которую daysUntil уже признал настоящей датой.
+function formatLongDate(isoDate) {
+  const parts = isoDate.split("-");
+  const day = Number(parts[2]);
+  const month = MONTHS_GENITIVE[Number(parts[1]) - 1];
+  return day + " " + month + " " + parts[0];
+}
+
+// Слово «день» в нужной форме: 1 день, 2 дня, 5 дней, 21 день, 111 дней.
+function daysWord(count) {
+  const lastTwo = count % 100;
+  const last = count % 10;
+  // 11–14 — всегда «дней», хотя оканчиваются на 1–4.
+  if (lastTwo >= 11 && lastTwo <= 14) return "дней";
+  if (last === 1) return "день";
+  if (last >= 2 && last <= 4) return "дня";
+  return "дней";
 }
 
 // Значок класса рядом с названием темы.

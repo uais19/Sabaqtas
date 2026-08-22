@@ -48,3 +48,43 @@ function levelLabel(level) {
   if (level === "strong") return "Уверенно себя чувствую";
   return "";
 }
+
+// Сколько целых дней осталось до даты из анкеты ("YYYY-MM-DD").
+// null — когда даты нет, строка не разбирается или дата уже прошла:
+// во всех трёх случаях показывать обратный отсчёт нечего.
+// Сравниваем только даты, без времени: обе собираем из года, месяца и числа
+// на полночь. Иначе «сегодня» давало бы 0 или −1 в зависимости от часа.
+function daysUntil(dateString) {
+  if (typeof dateString !== "string" || dateString === "") {
+    return null;
+  }
+
+  const parts = dateString.split("-");
+  if (parts.length !== 3) {
+    return null;
+  }
+  const year = Number(parts[0]);
+  const month = Number(parts[1]) - 1; // месяцы в Date считаются с нуля
+  const day = Number(parts[2]);
+  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) {
+    return null;
+  }
+
+  const target = new Date(year, month, day);
+  // Date молча «чинит» несуществующие даты (31 февраля -> 3 марта).
+  // Если после сборки что-то изменилось, строка была битой.
+  if (target.getFullYear() !== year || target.getMonth() !== month || target.getDate() !== day) {
+    return null;
+  }
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  // Округляем, а не делим нацело: в день перевода часов в сутках 23 или 25 часов.
+  const dayMs = 24 * 60 * 60 * 1000;
+  const days = Math.round((target - today) / dayMs);
+  if (days < 0) {
+    return null;
+  }
+  return days;
+}

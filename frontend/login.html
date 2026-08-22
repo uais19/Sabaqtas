@@ -87,6 +87,15 @@
         </select>
       </div>
 
+      <div class="teacher-form-field">
+        <label for="login-deadline">Дата экзамена или зачёта</label>
+        <!-- Дату спрашиваем у ученика, а не зашиваем сами: реальные даты
+             экзаменов мы проверить не можем. Поле необязательное, required
+             не ставим: у того, кто просто закрывает пробелы, экзамена нет. -->
+        <input class="add-input" id="login-deadline" type="date">
+        <p class="profile-note">Необязательно. Если дата есть, в кабинете появится обратный отсчёт до неё.</p>
+      </div>
+
       <button class="button button-primary" type="submit">Начать</button>
 
     </form>
