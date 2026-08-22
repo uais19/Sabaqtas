@@ -2085,3 +2085,97 @@ h1 {
   }
 
 }
+
+/* --- Экран входа --- */
+
+/* Анкета — простая колонка полей */
+.login-form {
+  display: grid;
+  gap: 16px;
+  max-width: 420px;
+  margin: 32px auto 0;
+}
+
+/* Блок демо-входа отделён линией: это другой путь, не часть анкеты */
+.demo-entry {
+  max-width: 420px;
+  margin: 40px auto 0;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.demo-entry-note {
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.demo-entry-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+@media (max-width: 600px) {
+  /* На телефоне кнопки демо-входа в столбик и во всю ширину:
+     так в них проще попасть пальцем */
+  .demo-entry-buttons {
+    flex-direction: column;
+  }
+
+  .demo-entry-buttons .button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Личная строка из анкеты (имя на диагностике, цель в кабинете) —
+   тише подзаголовка, тем же приглушённым цветом */
+.profile-line {
+  color: var(--muted);
+  font-size: 15px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* В кабинете строка цели стоит под левым подзаголовком, не по центру */
+.dash-section .profile-line {
+  text-align: left;
+  margin-top: 4px;
+}
+
+/* Пояснение под строкой цели: чуть тише и мельче самой строки.
+   Ширина ограничена, чтобы предложение читалось строкой, а не растягивалось
+   во весь экран. */
+.profile-note {
+  color: var(--muted);
+  font-size: 14px;
+  max-width: 60ch;
+  margin-top: 4px;
+}
+
+/* Обратный отсчёт в кабинете: та же семья, что .profile-line, но крупнее
+   и акцентным цветом — число дней должно читаться главным в своём разделе. */
+.deadline-line {
+  color: var(--accent);
+  font-size: 22px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+/* --- Логотип-лесенка --- */
+
+/* Логотип — значок и слово в одну строку, по центру по вертикали.
+   inline-flex, а не flex: ссылка остаётся строчной и не ломает шапку. */
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Значок не сжимается, когда в шапке тесно */
+.wordmark-mark {
+  flex-shrink: 0;
+}

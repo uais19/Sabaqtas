@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Панель учителя — Sabaqtas</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css">
   <script src="js/teacher-mock.js" defer></script>
   <script src="js/teacher.js" defer></script>
@@ -12,7 +13,7 @@
 
   <header class="site-header teacher-header">
     <div class="container header-inner teacher-header-inner">
-      <a class="wordmark" href="index.html">Sabaqtas</a>
+      <a class="wordmark" href="index.html"><svg class="wordmark-mark" viewBox="0 0 32 32" width="26" height="26" aria-hidden="true" focusable="false"><rect x="2" y="4" width="18" height="6" rx="2" fill="#00A3C4"/><rect x="6" y="13" width="18" height="6" rx="2" fill="#5BC0D6"/><rect x="10" y="22" width="18" height="6" rx="2" fill="#F5B301"/></svg>Sabaqtas</a>
       <h1 class="teacher-header-title">Панель учителя · <span id="class-title"></span></h1>
     </div>
   </header>
@@ -31,7 +32,7 @@
         </article>
         <article class="tile">
           <p class="tile-number" id="tile-gaveup"></p>
-          <p class="tile-label">Сдались на этой неделе</p>
+          <p class="tile-label">Застряли на этой неделе</p>
         </article>
       </div>
     </section>
@@ -47,7 +48,7 @@
               <th scope="col">Корневой пробел</th>
               <th scope="col">Класс пробела</th>
               <th scope="col">Прогресс</th>
-              <th scope="col">Сдался раз</th>
+              <th scope="col">Застревал раз</th>
             </tr>
           </thead>
           <tbody id="students-body"></tbody>
@@ -78,8 +79,8 @@
           </select>
         </div>
         <div class="teacher-form-field teacher-form-field-source">
-          <label for="add-source">Источник (§ и страница)</label>
-          <input class="add-input" id="add-source" type="text" placeholder="Например: §23, стр. 112" required>
+          <label for="add-source">Источник (параграф)</label>
+          <input class="add-input" id="add-source" type="text" placeholder="Например: Алгебра, 9 класс, §12" required>
         </div>
         <button class="button button-primary add-submit" type="submit">Добавить</button>
       </form>

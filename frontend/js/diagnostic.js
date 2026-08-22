@@ -6,6 +6,7 @@
 let diagnosticId = null;      // id диагностики, его выдаёт бэкенд
 let currentQuestion = null;   // вопрос, который сейчас на экране
 let isWaiting = false;        // пока показываем «верно/неверно», нажатия игнорируем
+let currentRow = null;        // строка лесенки темы, которую сейчас проверяем
 
 // --- Элементы страницы ---
 const stateQuestion = document.getElementById("state-question");
@@ -21,6 +22,31 @@ const resultText = document.getElementById("result-text");
 const resultSource = document.getElementById("result-source");
 const errorBox = document.getElementById("error");
 
+// --- Строка из анкеты ---
+// Диагностика всегда стартует с верхней темы цепочки и спускается вниз,
+// в каком бы классе ни был ученик. Строка с именем говорит это прямо, чтобы
+// вопрос за младший класс не выглядел ошибкой. Конкретный класс здесь не
+// называем: для семиклассника и одиннадцатиклассника он разный.
+// Профиля может не быть (страницу открыли по прямой ссылке) — тогда
+// строка просто остаётся скрытой.
+const profile = readProfile();
+if (profile && profile.name) {
+  const profileLine = document.getElementById("profile-line");
+  profileLine.textContent = profile.name + ", начинаем сверху и спускаемся, пока не найдём пробел";
+  profileLine.classList.remove("is-hidden");
+}
+
+// В интерфейсе показываем только параграф, без страницы: у разных изданий
+// учебника страницы разные, а параграф один и тот же.
+// «Математика, 5 класс, часть 1, §23, стр. 112» -> «Математика, 5 класс, часть 1, §23».
+function paragraphOnly(sourceRef) {
+  const index = sourceRef.indexOf(", стр.");
+  if (index === -1) {
+    return sourceRef;
+  }
+  return sourceRef.slice(0, index);
+}
+
 // Пауза на нужное число миллисекунд. Нужна, чтобы ученик успел увидеть,
 // верно он ответил или нет, прежде чем появится следующий вопрос.
 function wait(ms) {
@@ -30,6 +56,8 @@ function wait(ms) {
 // --- Лесенка -------------------------------------------------------------
 
 // Одна строка лесенки: тема слева, класс посередине, отметка справа.
+// topic.is_correct: true/false — тема пройдена/провалена; null — тема ещё
+// проверяется (первый ответ верный, впереди второй вопрос), отметки пока нет.
 // isRoot — это и есть найденный корневой пробел, его выделяем золотым.
 function createStairRow(topic, isRoot) {
   const row = document.createElement("li");
@@ -47,6 +75,7 @@ function createStairRow(topic, isRoot) {
   const status = document.createElement("span");
   status.className = "stair-status";
   if (isRoot) status.textContent = "здесь пробел";
+  else if (topic.is_correct === null) status.textContent = "ещё вопрос";
   else if (topic.is_correct) status.textContent = "✓ понятно";
   else status.textContent = "✕ не получилось";
 
@@ -54,12 +83,19 @@ function createStairRow(topic, isRoot) {
   return row;
 }
 
-// Добавляем в лесенку под вопросом ещё одну пройденную тему.
+// Строка темы в лесенке под вопросом. У темы ОДНА строка, сколько бы
+// вопросов по ней ни задали: после первого ответа строка появляется,
+// после второго — перерисовывается уже с итоговой отметкой.
 function addChainRow(topic) {
   const row = createStairRow(topic, false);
   // Класс запускает короткое появление строки — ученик замечает, что она новая.
   row.classList.add("stair-appear");
-  chainBox.append(row);
+  if (currentRow !== null) {
+    currentRow.replaceWith(row); // тема уже в лесенке — обновляем её строку
+  } else {
+    chainBox.append(row);
+  }
+  currentRow = row;
   chainTitle.classList.remove("is-hidden");
 }
 
@@ -104,12 +140,19 @@ async function handleAnswer(answerText, button) {
     // Подсвечиваем нажатую кнопку: верный ответ зелёным, неверный красным.
     button.classList.add(reply.is_correct ? "is-correct" : "is-wrong");
 
-    // Тема текущего вопроса уходит в лесенку с отметкой.
+    // Тема текущего вопроса — в лесенку. Пока тема не решена (topic_done:
+    // false — первый ответ верный, впереди второй вопрос), отметки нет:
+    // is_correct = null рисует «ещё вопрос». Решённая тема получает ✓ или ✕
+    // по последнему ответу — он её судьбу и решил.
     addChainRow({
       title: currentQuestion.topic_title,
       grade: currentQuestion.grade,
-      is_correct: reply.is_correct
+      is_correct: reply.topic_done ? reply.is_correct : null
     });
+    // Тема решена — следующий вопрос будет по другой теме, ей нужна своя строка.
+    if (reply.topic_done) {
+      currentRow = null;
+    }
 
     await wait(600); // время, чтобы увидеть подсветку
 
@@ -161,7 +204,17 @@ function showResult(result) {
     resultText.textContent =
       'Начинаем не с темы "' + firstTopic.title + '", а с темы "' + root.title + '"' + tail;
   }
-  resultSource.textContent = "источник — " + root.source_ref;
+
+  // Сверяем самооценку из анкеты с тем, что нашла диагностика — ради этого
+  // уровень и спрашивали. Уровня может не быть (профиля нет или он сохранён
+  // до появления поля) — тогда предложения просто не будет.
+  const level = profile ? levelLabel(profile.level) : "";
+  if (level) {
+    resultText.textContent +=
+      ' Ты оценил подготовку как «' + level + '», а пробел оказался за ' + root.grade + ' класс.';
+  }
+
+  resultSource.textContent = "источник — " + paragraphOnly(root.source_ref);
 }
 
 // --- Запуск и перезапуск -------------------------------------------------
@@ -175,6 +228,7 @@ function showError() {
 async function start() {
   errorBox.classList.add("is-hidden");
   chainBox.textContent = "";
+  currentRow = null;
   chainTitle.classList.add("is-hidden");
   stateResult.classList.add("is-hidden");
   stateQuestion.classList.remove("is-hidden");

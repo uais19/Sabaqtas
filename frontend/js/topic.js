@@ -8,55 +8,67 @@
 
 // --- Данные экрана -----------------------------------------------------------
 
-// Тема экрана — текущая тема плана, то есть корневой пробел ученика.
-const TOPIC = MOCK.progress.root_topic;
-
-// Правило из учебника берём из готового ответа ИИ в mock.js: это настоящий
-// фрагмент параграфа вместе со ссылкой на книгу.
-const MATERIAL = MOCK.askExplain.sources[0];
-
-// Шаг диагностики по этой теме — из него берём первое задание.
-function findDiagnosticStep(topicId) {
-  return MOCK.diagnosticChain.find(function (step) {
-    return step.topic_id === topicId;
-  });
+// Тема берётся из адреса страницы: topic.html?topic=<id>.
+// Параметр используем, только если такая тема есть в MOCK.topicTasks.
+// Нет параметра, он пустой или id неизвестен — показываем корневой пробел:
+// жюри может править адрес руками, и сломанного экрана оно видеть не должно.
+function topicIdFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("topic");
+  // hasOwnProperty, а не просто MOCK.topicTasks[id]: у любого объекта есть
+  // унаследованные поля вроде constructor, и ?topic=constructor прошёл бы.
+  if (id && MOCK.topicTasks.hasOwnProperty(id)) {
+    return id;
+  }
+  return MOCK.progress.root_topic.id;
 }
 
-const ROOT_STEP = findDiagnosticStep(TOPIC.id);
+const TOPIC_ID = topicIdFromUrl();
 
-// Три задания на тему.
-//
-// Первое — тот самый вопрос, на котором диагностика нашла пробел: берём
-// его из mock.js целиком, вместе с подсказкой наставника и разбором.
-// Двух других заданий в mock.js нет, а править mock.js нельзя, поэтому
-// они описаны здесь же — по образцу первого и на том же параграфе §23.
-const TASKS = [
-  {
-    text: ROOT_STEP.question.text,
-    options: ROOT_STEP.question.options,
-    correct_index: ROOT_STEP.question.correct_index,
-    hint: MOCK.mentorReply.reply,
-    explanation: MOCK.askExplain.answer
-  },
-  {
-    text: "Вычислите: 5/8 − 1/4",
-    options: ["3/8", "4/4", "1/2", "4/8"],
-    correct_index: 0,
-    hint: "Знаменатели 8 и 4 разные. Во сколько раз 8 больше 4 — и что тогда " +
-      "нужно сделать с дробью 1/4, чтобы у неё стал знаменатель 8?",
-    explanation: "Общий знаменатель — 8. Дробь 1/4 умножаем на 2 и получаем 2/8. " +
-      "Потом вычитаем числители: 5/8 − 2/8 = 3/8."
-  },
-  {
-    text: "Вычислите: 1/2 + 1/3",
-    options: ["2/5", "2/6", "5/6", "1/5"],
-    correct_index: 2,
-    hint: "Здесь ни один знаменатель не получается из другого умножением. " +
-      "Какое самое маленькое число делится и на 2, и на 3?",
-    explanation: "Общий знаменатель — 6: 1/2 это 3/6, а 1/3 это 2/6. " +
-      "Складываем числители: 3/6 + 2/6 = 5/6."
+// Материал и задания темы лежат в mock.js, в MOCK.topicTasks.
+const TOPIC_DATA = MOCK.topicTasks[TOPIC_ID];
+
+// Название и класс темы — из списка тем прогресса, ищем по topic_id.
+// Если темы там нет, берём корневой пробел: экран всё равно должен открыться.
+function findTopicInfo(topicId) {
+  const found = MOCK.progress.topics.find(function (topic) {
+    return topic.topic_id === topicId;
+  });
+  if (found) {
+    return { title: found.title, grade: found.grade };
   }
-];
+  const root = MOCK.progress.root_topic;
+  return { title: root.title, grade: root.grade };
+}
+
+const TOPIC = findTopicInfo(TOPIC_ID);
+
+// Правило из учебника: текст и ссылка на параграф. Эта же ссылка идёт
+// в шапку темы и в плашку источника под разбором задания.
+const MATERIAL = TOPIC_DATA.material;
+
+// Все задания темы: пять штук, у каждого сложность 1, 2 или 3.
+// За сессию показываем три, и какие именно — зависит от ответов ученика
+// (см. pickNextTask ниже).
+const ALL_TASKS = TOPIC_DATA.tasks;
+
+// Сколько заданий в одной сессии.
+const SESSION_LENGTH = 3;
+
+// --- Подстройка сложности ----------------------------------------------------
+//
+// Целевая сложность начинается с обычной (2). Каждое следующее задание —
+// ещё не показанное, чья сложность ближе всего к цели. После каждого
+// ЗАВЕРШЁННОГО задания (не после каждого клика) цель сдвигается:
+//   решил с первой попытки                -> на ступень выше (не больше 3)
+//   решил после ошибок или открыл ответ   -> на ступень ниже (не меньше 1)
+// Третьего исхода у задания нет.
+// Сдвигаем после каждого задания, а не после двух подряд, нарочно: сессия
+// длится всего три задания, более медленное правило не успело бы сработать
+// на глазах у ученика.
+const TARGET_START = 2;
+const MIN_DIFFICULTY = 1;
+const MAX_DIFFICULTY = 3;
 
 // Очки: с первой попытки — 10, после ошибок — 5, за показанный ответ — 0.
 const POINTS_FIRST_TRY = 10;
@@ -72,6 +84,9 @@ let attempts = 0;         // неудачные попытки на текуще
 let points = 0;           // набрано очков за тему
 let firstTryCount = 0;    // сколько заданий решено с первой попытки
 let answerButtons = [];   // кнопки вариантов текущего задания
+let target = TARGET_START; // целевая сложность следующего задания
+let previousTarget = TARGET_START; // какой была цель до последней подстройки
+const shownTasks = [];    // задания этой сессии в порядке показа
 
 // --- Запуск ------------------------------------------------------------------
 
@@ -95,14 +110,14 @@ function paragraphOnly(sourceRef) {
 function renderHeader() {
   document.getElementById("topic-title").textContent = TOPIC.title;
   document.getElementById("topic-grade").textContent = TOPIC.grade + " класс";
-  document.getElementById("topic-source").textContent = paragraphOnly(TOPIC.source_ref);
+  document.getElementById("topic-source").textContent = paragraphOnly(MATERIAL.source_ref);
 }
 
 function renderMaterial() {
-  document.getElementById("material-text").textContent = MATERIAL.snippet;
+  document.getElementById("material-text").textContent = MATERIAL.text;
   // Книга и параграф — без страницы, как и везде на этих экранах.
   document.getElementById("material-source").textContent =
-    "Источник: " + MATERIAL.book + ", " + MATERIAL.paragraph;
+    "Источник: " + paragraphOnly(MATERIAL.source_ref);
 }
 
 // Такая же плашка источника, как в чате: те же классы, тот же вид.
@@ -112,7 +127,7 @@ function createSourceBadge() {
 
   const badge = document.createElement("span");
   badge.className = "source-badge";
-  badge.textContent = "Источник: " + paragraphOnly(TOPIC.source_ref);
+  badge.textContent = "Источник: " + paragraphOnly(MATERIAL.source_ref);
 
   box.append(badge);
   return box;
@@ -120,13 +135,92 @@ function createSourceBadge() {
 
 // --- Задание -----------------------------------------------------------------
 
+// Какое задание показать следующим: ещё не показанное, чья сложность ближе
+// всего к целевой. При равной близости берём более простое — когда не
+// уверены, лучше быть добрее. Если и сложность равна, остаётся то, что
+// раньше в списке.
+function pickNextTask() {
+  let best = null;
+
+  ALL_TASKS.forEach(function (task) {
+    if (shownTasks.indexOf(task) !== -1) {
+      return; // уже показывали в этой сессии
+    }
+    if (best === null) {
+      best = task;
+      return;
+    }
+    const distance = Math.abs(task.difficulty - target);
+    const bestDistance = Math.abs(best.difficulty - target);
+    const closer = distance < bestDistance;
+    const sameDistanceButEasier = distance === bestDistance && task.difficulty < best.difficulty;
+    if (closer || sameDistanceButEasier) {
+      best = task;
+    }
+  });
+
+  return best;
+}
+
+// Сложность числом -> словом. Неизвестное число — пустая строка.
+function difficultyLabel(difficulty) {
+  if (difficulty === 1) return "простой";
+  if (difficulty === 2) return "обычный";
+  if (difficulty === 3) return "сложный";
+  return "";
+}
+
+// Подстройка после ЗАВЕРШЁННОГО задания. Решил с первой попытки — цель
+// на ступень выше; решил после ошибок или открыл ответ — на ступень ниже.
+function adjustTarget(solvedFirstTry) {
+  // Запоминаем, откуда сдвигаемся: по этому строка прогресса поймёт,
+  // стало сложнее или проще.
+  previousTarget = target;
+  if (solvedFirstTry) {
+    target = Math.min(MAX_DIFFICULTY, target + 1);
+  } else {
+    target = Math.max(MIN_DIFFICULTY, target - 1);
+  }
+}
+
+// Строка «Задание 2 из 3 · обычный уровень». Если после прошлого задания
+// цель сдвинулась, добавляем «— стало сложнее» или «— стало проще»:
+// подстройка должна быть видна, а не только работать.
+// Сравниваем ЦЕЛЬ до и после подстройки, а не сложность самих заданий:
+// хвост описывает решение системы. Когда цель выросла, а в данных остались
+// только задания попроще, сравнение заданий сказало бы «стало проще» —
+// ровно наоборот тому, что система решила.
+// На первом задании подстройки ещё не было, цель не менялась — хвоста нет.
+function renderProgress(task) {
+  const progress = document.getElementById("task-progress");
+  progress.textContent = "Задание " + (taskIndex + 1) + " из " + SESSION_LENGTH +
+    " · " + difficultyLabel(task.difficulty) + " уровень";
+
+  if (taskIndex === 0) {
+    return;
+  }
+  if (target === previousTarget) {
+    return;
+  }
+
+  // Хвост тем же приглушённым стилем, что и ссылка на параграф в шапке.
+  const tail = document.createElement("span");
+  tail.className = "topic-source";
+  if (target > previousTarget) {
+    tail.textContent = " — стало сложнее";
+  } else {
+    tail.textContent = " — стало проще";
+  }
+  progress.append(tail);
+}
+
 function renderTask() {
-  const task = TASKS[taskIndex];
+  const task = pickNextTask();
+  shownTasks.push(task);
   attempts = 0;
   answerButtons = [];
 
-  document.getElementById("task-progress").textContent =
-    "Задание " + (taskIndex + 1) + " из " + TASKS.length;
+  renderProgress(task);
   document.getElementById("task-text").textContent = task.text;
 
   const answers = document.getElementById("task-answers");
@@ -148,7 +242,7 @@ function renderTask() {
 }
 
 function checkAnswer(index, button) {
-  const task = TASKS[taskIndex];
+  const task = shownTasks[taskIndex];
 
   if (index === task.correct_index) {
     button.classList.add("is-correct");
@@ -160,6 +254,9 @@ function checkAnswer(index, button) {
     } else {
       points += POINTS_LATER;
     }
+
+    // Задание завершено — подстраиваем сложность следующего.
+    adjustTarget(attempts === 0);
 
     showCorrect(task);
     return;
@@ -203,7 +300,7 @@ function createNextButton() {
   const button = document.createElement("button");
   button.className = "button button-primary";
   button.type = "button";
-  if (taskIndex === TASKS.length - 1) {
+  if (taskIndex === SESSION_LENGTH - 1) {
     button.textContent = "Посмотреть итог";
   } else {
     button.textContent = "Следующее задание";
@@ -218,7 +315,7 @@ function showCorrect(task) {
   feedback.textContent = "";
   feedback.className = "task-feedback is-ok";
 
-  fillFeedback(feedback, "Верно", task.explanation);
+  fillFeedback(feedback, "Верно", task.explain);
   feedback.append(createSourceBadge());
 
   const actions = document.createElement("div");
@@ -263,17 +360,20 @@ function showWrong(task) {
 
 // Ученик попросил показать ответ. Очков за это задание не даём.
 function revealAnswer() {
-  const task = TASKS[taskIndex];
+  const task = shownTasks[taskIndex];
 
   answerButtons[task.correct_index].classList.add("is-correct");
   disableAnswers();
+
+  // Ответ открыт — задание завершено без решения, цель на ступень ниже.
+  adjustTarget(false);
 
   const feedback = document.getElementById("task-feedback");
   feedback.textContent = "";
   feedback.className = "task-feedback";
 
   fillFeedback(feedback, "Верный ответ: " + task.options[task.correct_index],
-    task.explanation);
+    task.explain);
 
   const note = document.createElement("p");
   note.className = "feedback-note";
@@ -292,11 +392,23 @@ function revealAnswer() {
 
 function nextTask() {
   taskIndex++;
-  if (taskIndex >= TASKS.length) {
+  if (taskIndex >= SESSION_LENGTH) {
     showSummary();
     return;
   }
   renderTask();
+}
+
+// Сегодняшняя дата строкой "YYYY-MM-DD" — в том же виде, в каком даты
+// лежат в mock.js. Собираем из ЛОКАЛЬНЫХ года, месяца и числа, а не через
+// toISOString: тот переводит время в UTC, и вечером в Казахстане (UTC+5)
+// дата съехала бы на вчерашнюю.
+function todayString() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return year + "-" + month + "-" + day;
 }
 
 function showSummary() {
@@ -308,7 +420,26 @@ function showSummary() {
   document.getElementById("summary-text").textContent =
     "Задания закончились. Ты набрал " + points + " очков.";
   document.getElementById("summary-detail").textContent =
-    "С первой попытки: " + firstTryCount + " из " + TASKS.length;
+    "С первой попытки: " + firstTryCount + " из " + SESSION_LENGTH;
+
+  // Записываем сессию в общий прогресс (readProgress / saveProgress живут
+  // в profile.js): очки прибавляем к накопленным, тему отмечаем закрытой.
+  //
+  // Тема считается закрытой, когда ученик прошёл все три её задания.
+  // Насколько хорошо прошёл — уже отражено в очках: 30 за идеальную
+  // сессию, 0 — если все три ответа открыл. Отдельного порога «закрыто
+  // только при N очках» нет нарочно: ученик дошёл до конца, план ведёт
+  // его дальше, а очки честно показывают, как это прошло.
+  const stored = readProgress();
+  stored.points += points;
+  // Тему можно пройти повторно: очки прибавятся снова, а в списке
+  // закрытых она должна остаться одна. Дату ставим только в первый раз —
+  // «закрыто» относится к тому дню, когда тему прошли впервые.
+  if (stored.closed.indexOf(TOPIC_ID) === -1) {
+    stored.closed.push(TOPIC_ID);
+    stored.closedAt[TOPIC_ID] = todayString();
+  }
+  saveProgress(stored);
 }
 
 // Запускаем в самом низу файла: константы выше объявлены через const,

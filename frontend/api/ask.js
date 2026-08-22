@@ -36,9 +36,16 @@ const EMBED_MODEL = "gemini-embedding-2";
 // у одной может быть 26 запросов из 20, а у соседней ноль. Поэтому здесь
 // не одна модель, а очередь запасных — как только у текущей кончился
 // лимит, тот же запрос уходит к следующей. Порядок — от лучшей к простой.
+//
+// Имена должны быть НАСТОЯЩИМИ: на несуществующее имя Gemini отвечает 404,
+// и очередь молча идёт дальше — запасная модель, которой нет, ничего не
+// страхует. Список сверен 22.08.2026 с ответом
+// GET /v1beta/models для нашего ключа: каждое имя там есть и поддерживает
+// generateContent. Проверить заново можно тем же запросом, он бесплатный.
 const GENERATION_MODELS = [
   "gemini-3.5-flash",
-  "gemini-3-flash",
+  "gemini-3.5-flash-lite",
+  "gemini-3-flash-preview",
   "gemini-2.5-flash",
   "gemini-2.5-flash-lite"
 ];
@@ -60,6 +67,21 @@ try {
   // Файла нет или он битый. Запоминаем пустой список — функция ответит
   // «не найдено», а причина будет видна в логах сервера.
   console.error("Не удалось загрузить chunks.json: " + error.message);
+}
+
+// --- Заготовленные ответы ------------------------------------------------
+// Ответы на типовые вопросы, сгенерированные заранее и уехавшие вместе с
+// деплоем. Проверяем их до эмбеддинга: заготовленный вопрос не тратит ни
+// генерацию, ни эмбеддинг и отвечается мгновенно. Это страховка на случай,
+// когда дневная квота уже выбрана, а сайт открыло жюри.
+let PREBAKED = {};
+try {
+  PREBAKED = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "answers.json"), "utf-8")
+  );
+} catch (error) {
+  // Файла нет или он битый — работаем без заготовок, причина в логах.
+  console.error("Не удалось загрузить answers.json: " + error.message);
 }
 
 // --- Кэш ответов -------------------------------------------------------------
@@ -85,6 +107,13 @@ const CACHE_LIMIT = 200;
 // «Что такое дробь?» и «что такое дробь? » считались одним вопросом.
 function cacheKey(question, mode, lang, grade) {
   return question.trim().toLowerCase() + "|" + mode + "|" + lang + "|" + grade;
+}
+
+// Ключ заготовок — без класса. Класс влияет только на обращение в промпте,
+// на поиск фрагментов он не влияет вообще, поэтому одной заготовки на
+// вопрос хватает для любого класса. Живой кэш класс по-прежнему учитывает.
+function prebakedKey(question, mode, lang) {
+  return question.trim().toLowerCase() + "|" + mode + "|" + lang;
 }
 
 // Кладём ответ в кэш и выбрасываем самые старые, если их стало слишком много.
@@ -179,7 +208,11 @@ async function fetchGemini(url, payload, apiKey, label, retryOn429) {
     // Лимит кончился, а повторять нам не разрешили — пусть вызывающий код
     // сам решает, что делать дальше (генерация возьмёт следующую модель).
     if (isQuotaError(response.status, details) && !retryOn429) {
-      const quota = new Error(label + ": лимит исчерпан (код " + response.status + ")");
+      // Начало тела ответа оставляем в сообщении: Gemini пишет там, какая
+      // именно квота кончилась и каков её предел. Без этого в логе не
+      // отличить «20 из 20 за день» от «у этой модели предел 0».
+      const quota = new Error(label + ": лимит исчерпан (код " + response.status +
+        "), " + details.slice(0, 200));
       quota.isQuota = true;
       throw quota;
     }
@@ -231,8 +264,17 @@ async function embedQuestion(question, apiKey) {
 //     не должна ронять всю функцию, просто пробуем дальше.
 // Остальные ошибки сменой модели не лечатся, их бросаем наверх.
 //
+// Когда список кончился, важно, ПОЧЕМУ он кончился. Если хоть одна модель
+// упёрлась в лимит — это квота, ученик видит «дневной лимит исчерпан».
+// Если же ни одна не упёрлась, значит каждое имя вернуло 404: это ошибка
+// в конфигурации, а не квота, и выглядеть как квота она не должна —
+// однажды из-за этого мы день искали не ту проблему.
+//
 // Возвращаем и текст, и имя модели, которая реально ответила.
 async function generateAnswer(system, contents, apiKey) {
+  // Упёрлась ли хоть одна модель именно в лимит.
+  let quotaHit = false;
+
   for (let i = 0; i < GENERATION_MODELS.length; i++) {
     const model = GENERATION_MODELS[i];
 
@@ -257,9 +299,17 @@ async function generateAnswer(system, contents, apiKey) {
       console.log("Ответила модель " + model);
       return { text: part.text, model: model };
     } catch (error) {
-      // Лимит или несуществующее имя модели — берём следующую из списка.
-      if (error.isQuota || error.status === 404) {
+      // Лимит — запоминаем, что он был, и берём следующую модель.
+      if (error.isQuota) {
+        quotaHit = true;
         console.error("Модель " + model + " не подошла: " + error.message +
+          ". Пробуем следующую.");
+        continue;
+      }
+      // Несуществующее имя — тоже идём дальше, но в логе это отдельная
+      // причина, чтобы опечатку было видно сразу.
+      if (error.status === 404) {
+        console.error("Модель " + model + " не найдена (404): " + error.message +
           ". Пробуем следующую.");
         continue;
       }
@@ -267,10 +317,19 @@ async function generateAnswer(system, contents, apiKey) {
     }
   }
 
-  // Список кончился: ни одна модель не ответила.
-  const exhausted = new Error("генерация: лимит кончился у всех моделей списка");
-  exhausted.isQuotaExhausted = true;
-  throw exhausted;
+  // Список кончился, и хотя бы одна модель упёрлась в лимит: до завтра
+  // он не оживёт, обработчик честно скажет ученику про дневной лимит.
+  if (quotaHit) {
+    const exhausted = new Error("генерация: лимит кончился у всех моделей списка");
+    exhausted.isQuotaExhausted = true;
+    throw exhausted;
+  }
+
+  // Лимита не было ни разу — значит все имена вернули 404. Это ошибка
+  // конфигурации: пометку isQuotaExhausted НЕ ставим, чтобы обработчик
+  // ушёл в общую ветку 502, а в логе было видно, что именно чинить.
+  console.error("ни одна модель из списка не найдена — проверь имена в GENERATION_MODELS");
+  throw new Error("генерация: ни одна модель из списка не найдена — проверь имена в GENERATION_MODELS");
 }
 
 // --- Чистка ответа -------------------------------------------------------------
@@ -307,6 +366,20 @@ function historyToContents(history) {
     });
 }
 
+// Тема диалога задана первым вопросом ученика. Со второго шага вопрос —
+// это короткая реплика («не знаю», «да»), не похожая ни на один кусок
+// учебника: порог отсёк бы её раньше, чем наставник успел ответить.
+function firstUserQuestion(history) {
+  if (!Array.isArray(history)) {
+    return "";
+  }
+  const found = history.find(function (message) {
+    return message && message.role === "user" &&
+           typeof message.text === "string" && message.text.trim() !== "";
+  });
+  return found ? found.text.trim() : "";
+}
+
 // --- Обработчик запроса ----------------------------------------------------------
 
 module.exports = async function handler(req, res) {
@@ -329,6 +402,12 @@ module.exports = async function handler(req, res) {
   const lang = body.lang === "kk" ? "kk" : "ru";
   const grade = Number(body.grade) || 9;
 
+  const history = body.history;
+  const hasHistory = Array.isArray(history) && history.length > 0;
+  // Кэшируем только первую реплику диалога. Дальше ответ зависит от истории,
+  // а её в ключе нет — вернули бы ответ на другой вопрос.
+  const cacheable = !hasHistory;
+
   // Проверяем вопрос: непустая строка не длиннее 1000 символов.
   if (typeof question !== "string" || question.trim() === "") {
     return res.status(400).json({ error: "Поле question должно быть непустой строкой" });
@@ -339,18 +418,38 @@ module.exports = async function handler(req, res) {
     });
   }
 
+  // По этому тексту ищем фрагменты учебника и считаем порог. В первой
+  // реплике это сам вопрос. Дальше — первый вопрос диалога: тему задал он,
+  // и порог он уже прошёл. Если истории нет или она битая — берём текущий
+  // вопрос, поведение как раньше.
+  const retrievalText = hasHistory
+    ? (firstUserQuestion(history) || question.trim())
+    : question.trim();
+
   // Шаг 0: кэш. Если такой вопрос уже отвечали, отдаём готовый ответ
   // и не трогаем Gemini вообще — ни эмбеддинг, ни генерацию.
   const key = cacheKey(question, mode, lang, grade);
-  const cached = ANSWER_CACHE.get(key);
+  const cached = cacheable ? ANSWER_CACHE.get(key) : undefined;
   if (cached) {
     console.log("Ответ из кэша: " + key);
     return res.status(200).json(cached);
   }
 
+  // Заготовленные ответы проверяем с той же оговоркой, что и кэш:
+  // только на первой реплике. Все заготовки — первые вопросы, и отдать
+  // такую посреди диалога наставника — тот же баг, что уже чинили.
+  if (cacheable) {
+    const prebaked = PREBAKED[prebakedKey(question, mode, lang)];
+    if (prebaked) {
+      console.log("Заготовленный ответ: " + prebakedKey(question, mode, lang));
+      return res.status(200).json(prebaked);
+    }
+  }
+
   try {
     // Шаг 1: вопрос -> вектор.
-    const questionVector = await embedQuestion(question.trim(), apiKey);
+    const questionVector = await embedQuestion(retrievalText, apiKey);
+    console.log("Поиск по тексту: " + retrievalText);
 
     // Шаг 2: похожесть вопроса на каждый кусок учебника.
     const scored = CHUNKS.map(function (chunk) {
@@ -417,7 +516,9 @@ module.exports = async function handler(req, res) {
         sources: [],
         model: generated.model
       };
-      saveToCache(key, refusal);
+      if (cacheable) {
+        saveToCache(key, refusal);
+      }
       return res.status(200).json(refusal);
     }
 
@@ -445,7 +546,9 @@ module.exports = async function handler(req, res) {
 
     // В кэш попадают только состоявшиеся ответы. Сбои, ошибки квоты и
     // отказы из-за ошибок сюда не доходят — они уходят в catch ниже.
-    saveToCache(key, payload);
+    if (cacheable) {
+      saveToCache(key, payload);
+    }
     return res.status(200).json(payload);
   } catch (error) {
     // Логируем причину на сервере, наружу отдаём общий текст без деталей:

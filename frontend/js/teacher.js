@@ -38,6 +38,17 @@ function renderTeacherPage() {
   document.getElementById("add-topic-form").addEventListener("submit", addTopic);
 }
 
+// В интерфейсе показываем только параграф, без страницы: у разных изданий
+// учебника страницы разные, а параграф один и тот же.
+// «Математика, 5 класс, часть 1, §23, стр. 112» -> «Математика, 5 класс, часть 1, §23».
+function paragraphOnly(sourceRef) {
+  const index = sourceRef.indexOf(", стр.");
+  if (index === -1) {
+    return sourceRef;
+  }
+  return sourceRef.slice(0, index);
+}
+
 // Создаём тонкую полосу и ограничиваем её значение диапазоном от 0 до 100.
 function createProgressBar(percent, colorClass) {
   const safePercent = Math.max(0, Math.min(100, percent));
@@ -65,7 +76,6 @@ function createStudentRow(student) {
   const progressCell = document.createElement("td");
   const gaveUpCell = document.createElement("td");
   const name = document.createElement("p");
-  const lastActive = document.createElement("p");
   const topic = document.createElement("p");
   const source = document.createElement("p");
   const progressBox = document.createElement("div");
@@ -73,14 +83,12 @@ function createStudentRow(student) {
 
   name.className = "student-name";
   name.textContent = student.name;
-  lastActive.className = "student-active";
-  lastActive.textContent = "был(а) в сети: " + student.last_active;
-  nameCell.append(name, lastActive);
+  nameCell.append(name);
 
   topic.className = "gap-title";
   topic.textContent = student.root_topic.title;
   source.className = "gap-source";
-  source.textContent = student.root_topic.source_ref;
+  source.textContent = paragraphOnly(student.root_topic.source_ref);
   topicCell.append(topic, source);
 
   gapGradeCell.className = "gap-grade-cell";
@@ -114,7 +122,8 @@ function createTopicRow(topic) {
   title.className = "class-topic-title";
   title.textContent = topic.title;
   source.className = "class-topic-source";
-  source.textContent = topic.source_ref || "";
+  // Источник у темы может быть пустым: у добавленных вручную тем его нет.
+  source.textContent = topic.source_ref ? paragraphOnly(topic.source_ref) : "";
 
   // Золотой цвет означает: с темой застряло больше половины класса.
   if (isHot) {

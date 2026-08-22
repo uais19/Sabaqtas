@@ -1,15 +1,84 @@
 // dashboard.js — личный кабинет ученика: корневой пробел, план обучения,
 // прогресс и слабые места.
 //
-// Все данные берём из mock.js и ничего не считаем сами: бэкенда для этого
-// экрана ещё нет, а показать полную картину на демо нужно уже сейчас.
+// Почти все данные берём из mock.js: бэкенда для этого экрана ещё нет,
+// а показать полную картину на демо нужно уже сейчас. По-настоящему
+// считаются только очки и закрытые темы: их экран заданий пишет в
+// localStorage, а здесь мы их читаем (readProgress в profile.js).
 // Комментарии подробные — код должен объясняться по строкам.
 
 function renderDashboard() {
+  // Очки и закрытые темы из localStorage. Читаем один раз: план и плитки
+  // прогресса должны видеть одни и те же цифры.
+  const stored = readProgress();
+
+  renderProfileLines();
   renderRootGap();
-  renderPlan();
-  renderProgress();
+  renderPlan(stored);
+  renderProgress(stored);
   renderWeakSpots();
+}
+
+// --- Имя и цель из анкеты ---
+// Профиля может не быть: страницу открыли по прямой ссылке. Тогда шапка
+// остаётся «Мой план», а строка цели — скрытой. Ничего не ломается.
+function renderProfileLines() {
+  const profile = readProfile();
+  if (!profile) {
+    return;
+  }
+
+  // Кабинет — экран ученика. Учитель может открыть его из демо, но ни имени
+  // в заголовке, ни цели, ни уровня, ни срока ему показывать нечего: всё это
+  // поля ученической анкеты. Для любой роли, кроме ученика, страница
+  // выглядит так же, как без профиля вообще.
+  if (profile.role !== "student") {
+    return;
+  }
+
+  if (profile.name) {
+    document.getElementById("header-title").textContent = "Мой план — " + profile.name;
+  }
+
+  const label = goalLabel(profile.goal);
+  if (label) {
+    const goalLine = document.getElementById("goal-line");
+    goalLine.textContent = "Цель: " + label;
+    goalLine.classList.remove("is-hidden");
+  }
+
+  // Пояснение под целью: как она связана с планом «снизу вверх».
+  // Свой независимый страж: нет текста — строка остаётся скрытой.
+  const note = goalNote(profile.goal);
+  if (note) {
+    const goalNoteLine = document.getElementById("goal-note");
+    goalNoteLine.textContent = note;
+    goalNoteLine.classList.remove("is-hidden");
+  }
+
+  // Уровень подготовки, который ученик указал на входе. Тоже со своим
+  // стражем: у профилей, сохранённых до появления этого поля, level нет —
+  // levelLabel вернёт пустую строку, и строка останется скрытой.
+  const level = levelLabel(profile.level);
+  if (level) {
+    const levelLine = document.getElementById("level-line");
+    levelLine.textContent = "Уровень на старте: " + level;
+    levelLine.classList.remove("is-hidden");
+  }
+
+  // Ближайшая цель: обратный отсчёт до даты из анкеты. Даты может не быть
+  // (поле необязательное), она может быть битой или уже прошедшей — во всех
+  // этих случаях daysUntil вернёт null, и раздел целиком остаётся скрытым.
+  const days = daysUntil(profile.deadline);
+  if (days !== null) {
+    // Если цель не указана или код неизвестен, пишем просто «Цель».
+    const goalName = goalLabel(profile.goal) || "Цель";
+    document.getElementById("deadline-line").textContent =
+      goalName + ": осталось " + days + " " + daysWord(days);
+    document.getElementById("deadline-note").textContent =
+      "Дата: " + formatLongDate(profile.deadline);
+    document.getElementById("deadline-section").classList.remove("is-hidden");
+  }
 }
 
 // --- Общие мелочи ------------------------------------------------------------
@@ -29,6 +98,43 @@ function paragraphOnly(sourceRef) {
 function formatDate(isoDate) {
   const parts = isoDate.split("-");
   return parts[2] + "." + parts[1] + "." + parts[0];
+}
+
+// Подпись под закрытой темой. Дата известна не всегда: темы, закрытые до
+// того, как мы начали её записывать, даты не имеют. Тогда пишем фразу без
+// даты — выдумывать её нельзя, а «Закрыто .» выглядело бы поломкой.
+function closedReason(closedDate) {
+  if (typeof closedDate !== "string" || closedDate === "") {
+    return "Закрыто. Эта тема больше не мешает.";
+  }
+  return "Закрыто " + formatDate(closedDate) + ". Эта тема больше не мешает.";
+}
+
+// Месяцы в родительном падеже — для даты вида «15 июня 2027».
+// Свой список, а не toLocaleDateString: тот в разных браузерах даёт разный вывод.
+const MONTHS_GENITIVE = [
+  "января", "февраля", "марта", "апреля", "мая", "июня",
+  "июля", "августа", "сентября", "октября", "ноября", "декабря"
+];
+
+// «2027-06-15» -> «15 июня 2027». Число без ведущего нуля: «5 мая», а не «05 мая».
+// Сюда попадает только строка, которую daysUntil уже признал настоящей датой.
+function formatLongDate(isoDate) {
+  const parts = isoDate.split("-");
+  const day = Number(parts[2]);
+  const month = MONTHS_GENITIVE[Number(parts[1]) - 1];
+  return day + " " + month + " " + parts[0];
+}
+
+// Слово «день» в нужной форме: 1 день, 2 дня, 5 дней, 21 день, 111 дней.
+function daysWord(count) {
+  const lastTwo = count % 100;
+  const last = count % 10;
+  // 11–14 — всегда «дней», хотя оканчиваются на 1–4.
+  if (lastTwo >= 11 && lastTwo <= 14) return "дней";
+  if (last === 1) return "день";
+  if (last >= 2 && last <= 4) return "дня";
+  return "дней";
 }
 
 // Значок класса рядом с названием темы.
@@ -65,42 +171,54 @@ function gradeOfTopic(topicId) {
   return found ? found.grade : null;
 }
 
-// Состояние темы: «в работе» — это текущая тема, остальные ещё впереди.
-// Закрытые темы в plan.items не попадают, они лежат отдельно в closed_gaps.
-function stateOfTopic(topicId) {
-  const found = MOCK.progress.topics.find(function (topic) {
-    return topic.topic_id === topicId;
-  });
-  if (found && found.status === "в работе") {
-    return "current";
-  }
-  return "ahead";
-}
-
-function renderPlan() {
+function renderPlan(stored) {
   const list = document.getElementById("plan-list");
 
   // Сначала уже закрытые пробелы: они ниже корневого по цепочке и показывают
   // ученику, что часть пути пройдена. Ссылки на учебник у них в данных нет.
   MOCK.progress.closed_gaps.forEach(function (gap) {
     list.append(createPlanRow({
+      topicId: gap.topic_id,
       title: gap.title,
       grade: gap.grade,
       source: "",
-      reason: "Закрыто " + formatDate(gap.closed_at) + ". Эта тема больше не мешает.",
+      reason: closedReason(gap.closed_at),
       state: "closed"
     }));
   });
 
   // Дальше сам план: он начинается с корневого пробела и поднимается вверх,
   // до темы текущего класса.
+  //
+  // Состояние строки. Тема, которую ученик прошёл на экране заданий, —
+  // закрыта (её id лежит в stored.closed). Текущая — ПЕРВАЯ незакрытая
+  // сверху: план идёт снизу вверх по цепочке, и заниматься надо следующей
+  // по ней. Всё, что идёт после текущей, — впереди. Если закрыто всё,
+  // текущей строки нет, и кнопка «Заниматься» не появляется ни у кого.
+  let currentFound = false;
   MOCK.plan.items.forEach(function (item) {
+    let state;
+    let reason = item.reason;
+    if (stored.closed.indexOf(item.topic_id) !== -1) {
+      state = "closed";
+      // Та же фраза, что у закрытых пробелов из mock. Дату экран заданий
+      // теперь записывает (closedAt в profile.js), но у тем, закрытых до
+      // этого, её нет — тогда строка просто идёт без даты.
+      reason = closedReason(stored.closedAt[item.topic_id]);
+    } else if (!currentFound) {
+      state = "current";
+      currentFound = true;
+    } else {
+      state = "ahead";
+    }
+
     list.append(createPlanRow({
+      topicId: item.topic_id,
       title: item.title,
       grade: gradeOfTopic(item.topic_id),
       source: paragraphOnly(item.source_ref),
-      reason: item.reason,
-      state: stateOfTopic(item.topic_id)
+      reason: reason,
+      state: state
     }));
   });
 }
@@ -143,13 +261,23 @@ function createPlanRow(row) {
   reason.textContent = row.reason;
   body.append(reason);
 
-  // Кнопка только у текущей темы: закрытые уже пройдены,
-  // а до будущих ещё рано — в этом и смысл плана.
+  // Переход к теме. Каждая строка ведёт на свою тему: topic.html?topic=<id>.
+  // У текущей темы — главная кнопка «Заниматься»: с неё и надо начинать,
+  // в этом смысл плана. У остальных незакрытых тем, для которых в
+  // MOCK.topicTasks есть задания, — тихая ссылка «Посмотреть», нарочно
+  // менее заметная. Закрытые темы и темы без заданий ссылки не получают.
+  const hasTasks = MOCK.topicTasks.hasOwnProperty(row.topicId);
   if (row.state === "current") {
     const link = document.createElement("a");
     link.className = "button button-primary plan-button";
-    link.href = "topic.html";
+    link.href = "topic.html?topic=" + row.topicId;
     link.textContent = "Заниматься";
+    body.append(link);
+  } else if (row.state === "ahead" && hasTasks) {
+    const link = document.createElement("a");
+    link.className = "link-button";
+    link.href = "topic.html?topic=" + row.topicId;
+    link.textContent = "Посмотреть";
     body.append(link);
   }
 
@@ -159,12 +287,18 @@ function createPlanRow(row) {
 
 // --- Блок 3: прогресс --------------------------------------------------------
 
-function renderProgress() {
+function renderProgress(stored) {
   const progress = MOCK.progress;
 
-  document.getElementById("tile-points").textContent = progress.points;
+  // Очки — настоящие, из localStorage: их начисляет экран заданий.
+  document.getElementById("tile-points").textContent = stored.points;
+  // Серия дней остаётся из mock нарочно: считать её по-настоящему мы пока
+  // не умеем, а полусделанный счётчик хуже честной заглушки.
   document.getElementById("tile-streak").textContent = progress.streak_days;
-  document.getElementById("tile-closed").textContent = progress.closed_gaps.length;
+  // Закрытые пробелы: те, что уже были в данных, плюс темы, которые ученик
+  // закрыл сам на экране заданий.
+  document.getElementById("tile-closed").textContent =
+    progress.closed_gaps.length + stored.closed.length;
 
   // Список полученных достижений — это id из mock.js.
   const earnedIds = progress.achievements.map(function (achievement) {
@@ -177,7 +311,8 @@ function renderProgress() {
   const badges = [
     {
       title: "Первый закрытый пробел",
-      earned: earnedIds.indexOf("ach_first_gap") !== -1
+      // Есть хотя бы один закрытый пробел: в данных или закрытый учеником.
+      earned: progress.closed_gaps.length > 0 || stored.closed.length > 0
     },
     {
       title: "Серия 3 дня",
