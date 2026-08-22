@@ -399,6 +399,18 @@ function nextTask() {
   renderTask();
 }
 
+// Сегодняшняя дата строкой "YYYY-MM-DD" — в том же виде, в каком даты
+// лежат в mock.js. Собираем из ЛОКАЛЬНЫХ года, месяца и числа, а не через
+// toISOString: тот переводит время в UTC, и вечером в Казахстане (UTC+5)
+// дата съехала бы на вчерашнюю.
+function todayString() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return year + "-" + month + "-" + day;
+}
+
 function showSummary() {
   document.getElementById("tasks").classList.add("is-hidden");
   document.getElementById("summary").classList.remove("is-hidden");
@@ -421,9 +433,11 @@ function showSummary() {
   const stored = readProgress();
   stored.points += points;
   // Тему можно пройти повторно: очки прибавятся снова, а в списке
-  // закрытых она должна остаться одна.
+  // закрытых она должна остаться одна. Дату ставим только в первый раз —
+  // «закрыто» относится к тому дню, когда тему прошли впервые.
   if (stored.closed.indexOf(TOPIC_ID) === -1) {
     stored.closed.push(TOPIC_ID);
+    stored.closedAt[TOPIC_ID] = todayString();
   }
   saveProgress(stored);
 }

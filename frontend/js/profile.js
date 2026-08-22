@@ -98,12 +98,15 @@ function daysUntil(dateString) {
 // Ключ "sabaqtas-progress", внутри { points: <число>, closed: [<topic_id>, ...] }.
 // points — сумма очков за все пройденные сессии заданий,
 // closed — id тем, в которых ученик прошёл все задания до конца.
+// closedAt — когда именно каждая из них закрыта: { "<topic_id>": "YYYY-MM-DD" }.
+// Отдельным объектом, а не полем внутри closed: closed остаётся простым
+// списком id, и всё, что его читает, работает как раньше.
 
 // Прогресс с нуля. Каждый раз новый объект: вызывающий код его меняет
 // (прибавляет очки, дописывает тему), и один общий объект на всех был бы
 // ошибкой.
 function emptyProgress() {
-  return { points: 0, closed: [] };
+  return { points: 0, closed: [], closedAt: {} };
 }
 
 // Сохранённый прогресс или прогресс с нуля. С нуля — при любой неожиданности:
@@ -124,7 +127,14 @@ function readProgress() {
     if (typeof progress.points !== "number" || !Array.isArray(progress.closed)) {
       return emptyProgress();
     }
-    return { points: progress.points, closed: progress.closed };
+    // closedAt появился позже closed, поэтому у старых записей его нет.
+    // Из-за одной недостающей даты весь прогресс терять нельзя: подставляем
+    // пустой объект. Массив тоже не подходит — ждём словарь id -> дата.
+    let closedAt = progress.closedAt;
+    if (!closedAt || typeof closedAt !== "object" || Array.isArray(closedAt)) {
+      closedAt = {};
+    }
+    return { points: progress.points, closed: progress.closed, closedAt: closedAt };
   } catch (error) {
     return emptyProgress();
   }

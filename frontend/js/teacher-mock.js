@@ -12,8 +12,7 @@ const TEACHER_MOCK = {
       },
       progress_percent: 72,
       closed_gaps: 3,
-      gave_up_count: 1,
-      last_active: "сегодня, 14:20"
+      gave_up_count: 1
     },
     {
       name: "Нуртас Касымов",
@@ -25,8 +24,7 @@ const TEACHER_MOCK = {
       },
       progress_percent: 37,
       closed_gaps: 1,
-      gave_up_count: 3,
-      last_active: "сегодня, 10:05"
+      gave_up_count: 3
     },
     {
       name: "Аружан Бекенова",
@@ -38,8 +36,7 @@ const TEACHER_MOCK = {
       },
       progress_percent: 64,
       closed_gaps: 2,
-      gave_up_count: 0,
-      last_active: "вчера, 18:40"
+      gave_up_count: 0
     },
     {
       name: "Данияр Ермеков",
@@ -51,8 +48,7 @@ const TEACHER_MOCK = {
       },
       progress_percent: 18,
       closed_gaps: 0,
-      gave_up_count: 2,
-      last_active: "19 августа"
+      gave_up_count: 2
     },
     {
       name: "Мөлдір Сапарова",
@@ -64,8 +60,7 @@ const TEACHER_MOCK = {
       },
       progress_percent: 88,
       closed_gaps: 4,
-      gave_up_count: 1,
-      last_active: "вчера, 16:10"
+      gave_up_count: 1
     }
   ],
   class_stats: [

@@ -28,6 +28,14 @@ function renderProfileLines() {
     return;
   }
 
+  // Кабинет — экран ученика. Учитель может открыть его из демо, но ни имени
+  // в заголовке, ни цели, ни уровня, ни срока ему показывать нечего: всё это
+  // поля ученической анкеты. Для любой роли, кроме ученика, страница
+  // выглядит так же, как без профиля вообще.
+  if (profile.role !== "student") {
+    return;
+  }
+
   if (profile.name) {
     document.getElementById("header-title").textContent = "Мой план — " + profile.name;
   }
@@ -90,6 +98,16 @@ function paragraphOnly(sourceRef) {
 function formatDate(isoDate) {
   const parts = isoDate.split("-");
   return parts[2] + "." + parts[1] + "." + parts[0];
+}
+
+// Подпись под закрытой темой. Дата известна не всегда: темы, закрытые до
+// того, как мы начали её записывать, даты не имеют. Тогда пишем фразу без
+// даты — выдумывать её нельзя, а «Закрыто .» выглядело бы поломкой.
+function closedReason(closedDate) {
+  if (typeof closedDate !== "string" || closedDate === "") {
+    return "Закрыто. Эта тема больше не мешает.";
+  }
+  return "Закрыто " + formatDate(closedDate) + ". Эта тема больше не мешает.";
 }
 
 // Месяцы в родительном падеже — для даты вида «15 июня 2027».
@@ -164,7 +182,7 @@ function renderPlan(stored) {
       title: gap.title,
       grade: gap.grade,
       source: "",
-      reason: "Закрыто " + formatDate(gap.closed_at) + ". Эта тема больше не мешает.",
+      reason: closedReason(gap.closed_at),
       state: "closed"
     }));
   });
@@ -183,9 +201,10 @@ function renderPlan(stored) {
     let reason = item.reason;
     if (stored.closed.indexOf(item.topic_id) !== -1) {
       state = "closed";
-      // Та же фраза, что у закрытых пробелов из mock, только без даты:
-      // дату закрытия мы не храним, а выдумывать её нельзя.
-      reason = "Закрыто. Эта тема больше не мешает.";
+      // Та же фраза, что у закрытых пробелов из mock. Дату экран заданий
+      // теперь записывает (closedAt в profile.js), но у тем, закрытых до
+      // этого, её нет — тогда строка просто идёт без даты.
+      reason = closedReason(stored.closedAt[item.topic_id]);
     } else if (!currentFound) {
       state = "current";
       currentFound = true;
