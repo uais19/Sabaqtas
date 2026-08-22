@@ -41,17 +41,16 @@
 
       <div class="teacher-form-field">
         <label for="login-grade">Класс</label>
-        <!-- Готовая цепочка диагностики идёт 8 -> 7 -> 6 -> 5, поэтому она
-             осмысленна для 8 и 9 класса: девятикласснику проверяется база
-             на год ниже. Остальным классам нужны свои цепочки, их пока нет. -->
+        <!-- Цепочка тем идёт 8 -> 7 -> 6 -> 5, и диагностика всегда начинает
+             с её верхней темы и спускается вниз, пока ученик не ответит
+             верно. Поэтому она работает для любого класса из списка:
+             старшекласснику проверяется база, на которой стоит его программа. -->
         <select class="add-input" id="login-grade">
-          <option value="5" disabled>5 класс — скоро</option>
-          <option value="6" disabled>6 класс — скоро</option>
-          <option value="7" disabled>7 класс — скоро</option>
+          <option value="7">7 класс</option>
           <option value="8" selected>8 класс</option>
           <option value="9">9 класс</option>
-          <option value="10" disabled>10 класс — скоро</option>
-          <option value="11" disabled>11 класс — скоро</option>
+          <option value="10">10 класс</option>
+          <option value="11">11 класс</option>
         </select>
       </div>
 
@@ -68,11 +67,23 @@
       </div>
 
       <div class="teacher-form-field">
+        <label for="login-level">Уровень подготовки</label>
+        <!-- Самооценка ученика. В конце диагностики мы сравним её
+             с тем, что нашлось на самом деле. -->
+        <select class="add-input" id="login-level">
+          <option value="weak">Многое забыл</option>
+          <option value="medium" selected>Средний</option>
+          <option value="strong">Уверенно себя чувствую</option>
+        </select>
+      </div>
+
+      <div class="teacher-form-field">
         <label for="login-goal">Цель</label>
         <select class="add-input" id="login-goal">
           <option value="gaps" selected>Закрыть пробелы за прошлые годы</option>
           <option value="current">Подтянуть текущую тему</option>
           <option value="ent">Подготовка к ЕНТ</option>
+          <option value="olympiad">Подготовка к олимпиаде</option>
         </select>
       </div>
 

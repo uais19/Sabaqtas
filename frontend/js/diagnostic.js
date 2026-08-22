@@ -22,14 +22,16 @@ const resultSource = document.getElementById("result-source");
 const errorBox = document.getElementById("error");
 
 // --- Строка из анкеты ---
-// Девятиклассника проверяем на материале 8 класса — это продукт работает
-// правильно, а не перепутал класс. Строка с именем говорит это явно.
+// Диагностика всегда стартует с верхней темы цепочки и спускается вниз,
+// в каком бы классе ни был ученик. Строка с именем говорит это прямо, чтобы
+// вопрос за младший класс не выглядел ошибкой. Конкретный класс здесь не
+// называем: для семиклассника и одиннадцатиклассника он разный.
 // Профиля может не быть (страницу открыли по прямой ссылке) — тогда
 // строка просто остаётся скрытой.
 const profile = readProfile();
 if (profile && profile.name) {
   const profileLine = document.getElementById("profile-line");
-  profileLine.textContent = profile.name + ", начинаем с базы за 8 класс";
+  profileLine.textContent = profile.name + ", начинаем сверху и спускаемся, пока не найдём пробел";
   profileLine.classList.remove("is-hidden");
 }
 
@@ -184,6 +186,16 @@ function showResult(result) {
     resultText.textContent =
       'Начинаем не с темы "' + firstTopic.title + '", а с темы "' + root.title + '"' + tail;
   }
+
+  // Сверяем самооценку из анкеты с тем, что нашла диагностика — ради этого
+  // уровень и спрашивали. Уровня может не быть (профиля нет или он сохранён
+  // до появления поля) — тогда предложения просто не будет.
+  const level = profile ? levelLabel(profile.level) : "";
+  if (level) {
+    resultText.textContent +=
+      ' Ты оценил подготовку как «' + level + '», а пробел оказался за ' + root.grade + ' класс.';
+  }
+
   resultSource.textContent = "источник — " + paragraphOnly(root.source_ref);
 }
 

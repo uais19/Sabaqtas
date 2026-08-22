@@ -41,6 +41,16 @@ function renderProfileLines() {
     goalNoteLine.textContent = note;
     goalNoteLine.classList.remove("is-hidden");
   }
+
+  // Уровень подготовки, который ученик указал на входе. Тоже со своим
+  // стражем: у профилей, сохранённых до появления этого поля, level нет —
+  // levelLabel вернёт пустую строку, и строка останется скрытой.
+  const level = levelLabel(profile.level);
+  if (level) {
+    const levelLine = document.getElementById("level-line");
+    levelLine.textContent = "Уровень на старте: " + level;
+    levelLine.classList.remove("is-hidden");
+  }
 }
 
 // --- Общие мелочи ------------------------------------------------------------

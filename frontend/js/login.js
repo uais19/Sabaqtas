@@ -10,6 +10,7 @@ const nameInput = document.getElementById("login-name");
 const passInput = document.getElementById("login-pass");
 const gradeSelect = document.getElementById("login-grade");
 const subjectSelect = document.getElementById("login-subject");
+const levelSelect = document.getElementById("login-level");
 const goalSelect = document.getElementById("login-goal");
 const errorBox = document.getElementById("error");
 
@@ -91,6 +92,7 @@ async function submitForm(event) {
     passHash: passHash,
     grade: Number(gradeSelect.value),
     subject: subjectSelect.value,
+    level: levelSelect.value,
     goal: goalSelect.value,
     role: "student"
   });
@@ -108,6 +110,7 @@ function enterAsStudent() {
     passHash: "",
     grade: 8,
     subject: "Математика",
+    level: "medium",
     goal: "gaps",
     role: "student"
   });
@@ -122,6 +125,7 @@ function enterAsTeacher() {
     passHash: "",
     grade: 0,
     subject: "Математика",
+    level: "",
     goal: "",
     role: "teacher"
   });
