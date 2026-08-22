@@ -166,6 +166,7 @@ function renderPlan() {
   // ученику, что часть пути пройдена. Ссылки на учебник у них в данных нет.
   MOCK.progress.closed_gaps.forEach(function (gap) {
     list.append(createPlanRow({
+      topicId: gap.topic_id,
       title: gap.title,
       grade: gap.grade,
       source: "",
@@ -178,6 +179,7 @@ function renderPlan() {
   // до темы текущего класса.
   MOCK.plan.items.forEach(function (item) {
     list.append(createPlanRow({
+      topicId: item.topic_id,
       title: item.title,
       grade: gradeOfTopic(item.topic_id),
       source: paragraphOnly(item.source_ref),
@@ -225,13 +227,23 @@ function createPlanRow(row) {
   reason.textContent = row.reason;
   body.append(reason);
 
-  // Кнопка только у текущей темы: закрытые уже пройдены,
-  // а до будущих ещё рано — в этом и смысл плана.
+  // Переход к теме. Каждая строка ведёт на свою тему: topic.html?topic=<id>.
+  // У текущей темы — главная кнопка «Заниматься»: с неё и надо начинать,
+  // в этом смысл плана. У остальных незакрытых тем, для которых в
+  // MOCK.topicTasks есть задания, — тихая ссылка «Посмотреть», нарочно
+  // менее заметная. Закрытые темы и темы без заданий ссылки не получают.
+  const hasTasks = MOCK.topicTasks.hasOwnProperty(row.topicId);
   if (row.state === "current") {
     const link = document.createElement("a");
     link.className = "button button-primary plan-button";
-    link.href = "topic.html";
+    link.href = "topic.html?topic=" + row.topicId;
     link.textContent = "Заниматься";
+    body.append(link);
+  } else if (row.state === "ahead" && hasTasks) {
+    const link = document.createElement("a");
+    link.className = "link-button";
+    link.href = "topic.html?topic=" + row.topicId;
+    link.textContent = "Посмотреть";
     body.append(link);
   }
 

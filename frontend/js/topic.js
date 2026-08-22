@@ -8,55 +8,48 @@
 
 // --- Данные экрана -----------------------------------------------------------
 
-// Тема экрана — текущая тема плана, то есть корневой пробел ученика.
-const TOPIC = MOCK.progress.root_topic;
-
-// Правило из учебника берём из готового ответа ИИ в mock.js: это настоящий
-// фрагмент параграфа вместе со ссылкой на книгу.
-const MATERIAL = MOCK.askExplain.sources[0];
-
-// Шаг диагностики по этой теме — из него берём первое задание.
-function findDiagnosticStep(topicId) {
-  return MOCK.diagnosticChain.find(function (step) {
-    return step.topic_id === topicId;
-  });
+// Тема берётся из адреса страницы: topic.html?topic=<id>.
+// Параметр используем, только если такая тема есть в MOCK.topicTasks.
+// Нет параметра, он пустой или id неизвестен — показываем корневой пробел:
+// жюри может править адрес руками, и сломанного экрана оно видеть не должно.
+function topicIdFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("topic");
+  // hasOwnProperty, а не просто MOCK.topicTasks[id]: у любого объекта есть
+  // унаследованные поля вроде constructor, и ?topic=constructor прошёл бы.
+  if (id && MOCK.topicTasks.hasOwnProperty(id)) {
+    return id;
+  }
+  return MOCK.progress.root_topic.id;
 }
 
-const ROOT_STEP = findDiagnosticStep(TOPIC.id);
+const TOPIC_ID = topicIdFromUrl();
 
-// Три задания на тему.
-//
-// Первое — тот самый вопрос, на котором диагностика нашла пробел: берём
-// его из mock.js целиком, вместе с подсказкой наставника и разбором.
-// Двух других заданий в mock.js нет, а править mock.js нельзя, поэтому
-// они описаны здесь же — по образцу первого и на том же параграфе §23.
-const TASKS = [
-  {
-    text: ROOT_STEP.question.text,
-    options: ROOT_STEP.question.options,
-    correct_index: ROOT_STEP.question.correct_index,
-    hint: MOCK.mentorReply.reply,
-    explanation: MOCK.askExplain.answer
-  },
-  {
-    text: "Вычислите: 5/8 − 1/4",
-    options: ["3/8", "4/4", "1/2", "4/8"],
-    correct_index: 0,
-    hint: "Знаменатели 8 и 4 разные. Во сколько раз 8 больше 4 — и что тогда " +
-      "нужно сделать с дробью 1/4, чтобы у неё стал знаменатель 8?",
-    explanation: "Общий знаменатель — 8. Дробь 1/4 умножаем на 2 и получаем 2/8. " +
-      "Потом вычитаем числители: 5/8 − 2/8 = 3/8."
-  },
-  {
-    text: "Вычислите: 1/2 + 1/3",
-    options: ["2/5", "2/6", "5/6", "1/5"],
-    correct_index: 2,
-    hint: "Здесь ни один знаменатель не получается из другого умножением. " +
-      "Какое самое маленькое число делится и на 2, и на 3?",
-    explanation: "Общий знаменатель — 6: 1/2 это 3/6, а 1/3 это 2/6. " +
-      "Складываем числители: 3/6 + 2/6 = 5/6."
+// Материал и задания темы лежат в mock.js, в MOCK.topicTasks.
+const TOPIC_DATA = MOCK.topicTasks[TOPIC_ID];
+
+// Название и класс темы — из списка тем прогресса, ищем по topic_id.
+// Если темы там нет, берём корневой пробел: экран всё равно должен открыться.
+function findTopicInfo(topicId) {
+  const found = MOCK.progress.topics.find(function (topic) {
+    return topic.topic_id === topicId;
+  });
+  if (found) {
+    return { title: found.title, grade: found.grade };
   }
-];
+  const root = MOCK.progress.root_topic;
+  return { title: root.title, grade: root.grade };
+}
+
+const TOPIC = findTopicInfo(TOPIC_ID);
+
+// Правило из учебника: текст и ссылка на параграф. Эта же ссылка идёт
+// в шапку темы и в плашку источника под разбором задания.
+const MATERIAL = TOPIC_DATA.material;
+
+// Три задания на тему — первые три из списка, в порядке файла.
+// Подбор заданий по сложности — следующий шаг, здесь его ещё нет.
+const TASKS = TOPIC_DATA.tasks.slice(0, 3);
 
 // Очки: с первой попытки — 10, после ошибок — 5, за показанный ответ — 0.
 const POINTS_FIRST_TRY = 10;
@@ -95,14 +88,14 @@ function paragraphOnly(sourceRef) {
 function renderHeader() {
   document.getElementById("topic-title").textContent = TOPIC.title;
   document.getElementById("topic-grade").textContent = TOPIC.grade + " класс";
-  document.getElementById("topic-source").textContent = paragraphOnly(TOPIC.source_ref);
+  document.getElementById("topic-source").textContent = paragraphOnly(MATERIAL.source_ref);
 }
 
 function renderMaterial() {
-  document.getElementById("material-text").textContent = MATERIAL.snippet;
+  document.getElementById("material-text").textContent = MATERIAL.text;
   // Книга и параграф — без страницы, как и везде на этих экранах.
   document.getElementById("material-source").textContent =
-    "Источник: " + MATERIAL.book + ", " + MATERIAL.paragraph;
+    "Источник: " + paragraphOnly(MATERIAL.source_ref);
 }
 
 // Такая же плашка источника, как в чате: те же классы, тот же вид.
@@ -112,7 +105,7 @@ function createSourceBadge() {
 
   const badge = document.createElement("span");
   badge.className = "source-badge";
-  badge.textContent = "Источник: " + paragraphOnly(TOPIC.source_ref);
+  badge.textContent = "Источник: " + paragraphOnly(MATERIAL.source_ref);
 
   box.append(badge);
   return box;
@@ -218,7 +211,7 @@ function showCorrect(task) {
   feedback.textContent = "";
   feedback.className = "task-feedback is-ok";
 
-  fillFeedback(feedback, "Верно", task.explanation);
+  fillFeedback(feedback, "Верно", task.explain);
   feedback.append(createSourceBadge());
 
   const actions = document.createElement("div");
@@ -273,7 +266,7 @@ function revealAnswer() {
   feedback.className = "task-feedback";
 
   fillFeedback(feedback, "Верный ответ: " + task.options[task.correct_index],
-    task.explanation);
+    task.explain);
 
   const note = document.createElement("p");
   note.className = "feedback-note";
