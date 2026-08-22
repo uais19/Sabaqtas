@@ -85,6 +85,7 @@ let points = 0;           // набрано очков за тему
 let firstTryCount = 0;    // сколько заданий решено с первой попытки
 let answerButtons = [];   // кнопки вариантов текущего задания
 let target = TARGET_START; // целевая сложность следующего задания
+let previousTarget = TARGET_START; // какой была цель до последней подстройки
 const shownTasks = [];    // задания этой сессии в порядке показа
 
 // --- Запуск ------------------------------------------------------------------
@@ -172,6 +173,9 @@ function difficultyLabel(difficulty) {
 // Подстройка после ЗАВЕРШЁННОГО задания. Решил с первой попытки — цель
 // на ступень выше; решил после ошибок или открыл ответ — на ступень ниже.
 function adjustTarget(solvedFirstTry) {
+  // Запоминаем, откуда сдвигаемся: по этому строка прогресса поймёт,
+  // стало сложнее или проще.
+  previousTarget = target;
   if (solvedFirstTry) {
     target = Math.min(MAX_DIFFICULTY, target + 1);
   } else {
@@ -179,10 +183,14 @@ function adjustTarget(solvedFirstTry) {
   }
 }
 
-// Строка «Задание 2 из 3 · обычный уровень». Если сложность отличается от
-// прошлого задания, добавляем «— стало проще» или «— стало сложнее»:
-// подстройка должна быть видна, а не только работать. На первом задании
-// сравнивать не с чем, поэтому хвоста нет.
+// Строка «Задание 2 из 3 · обычный уровень». Если после прошлого задания
+// цель сдвинулась, добавляем «— стало сложнее» или «— стало проще»:
+// подстройка должна быть видна, а не только работать.
+// Сравниваем ЦЕЛЬ до и после подстройки, а не сложность самих заданий:
+// хвост описывает решение системы. Когда цель выросла, а в данных остались
+// только задания попроще, сравнение заданий сказало бы «стало проще» —
+// ровно наоборот тому, что система решила.
+// На первом задании подстройки ещё не было, цель не менялась — хвоста нет.
 function renderProgress(task) {
   const progress = document.getElementById("task-progress");
   progress.textContent = "Задание " + (taskIndex + 1) + " из " + SESSION_LENGTH +
@@ -191,18 +199,17 @@ function renderProgress(task) {
   if (taskIndex === 0) {
     return;
   }
-  const previous = shownTasks[taskIndex - 1];
-  if (task.difficulty === previous.difficulty) {
+  if (target === previousTarget) {
     return;
   }
 
   // Хвост тем же приглушённым стилем, что и ссылка на параграф в шапке.
   const tail = document.createElement("span");
   tail.className = "topic-source";
-  if (task.difficulty < previous.difficulty) {
-    tail.textContent = " — стало проще";
-  } else {
+  if (target > previousTarget) {
     tail.textContent = " — стало сложнее";
+  } else {
+    tail.textContent = " — стало проще";
   }
   progress.append(tail);
 }
@@ -402,6 +409,23 @@ function showSummary() {
     "Задания закончились. Ты набрал " + points + " очков.";
   document.getElementById("summary-detail").textContent =
     "С первой попытки: " + firstTryCount + " из " + SESSION_LENGTH;
+
+  // Записываем сессию в общий прогресс (readProgress / saveProgress живут
+  // в profile.js): очки прибавляем к накопленным, тему отмечаем закрытой.
+  //
+  // Тема считается закрытой, когда ученик прошёл все три её задания.
+  // Насколько хорошо прошёл — уже отражено в очках: 30 за идеальную
+  // сессию, 0 — если все три ответа открыл. Отдельного порога «закрыто
+  // только при N очках» нет нарочно: ученик дошёл до конца, план ведёт
+  // его дальше, а очки честно показывают, как это прошло.
+  const stored = readProgress();
+  stored.points += points;
+  // Тему можно пройти повторно: очки прибавятся снова, а в списке
+  // закрытых она должна остаться одна.
+  if (stored.closed.indexOf(TOPIC_ID) === -1) {
+    stored.closed.push(TOPIC_ID);
+  }
+  saveProgress(stored);
 }
 
 // Запускаем в самом низу файла: константы выше объявлены через const,

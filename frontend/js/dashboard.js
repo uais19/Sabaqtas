@@ -1,15 +1,21 @@
 // dashboard.js — личный кабинет ученика: корневой пробел, план обучения,
 // прогресс и слабые места.
 //
-// Все данные берём из mock.js и ничего не считаем сами: бэкенда для этого
-// экрана ещё нет, а показать полную картину на демо нужно уже сейчас.
+// Почти все данные берём из mock.js: бэкенда для этого экрана ещё нет,
+// а показать полную картину на демо нужно уже сейчас. По-настоящему
+// считаются только очки и закрытые темы: их экран заданий пишет в
+// localStorage, а здесь мы их читаем (readProgress в profile.js).
 // Комментарии подробные — код должен объясняться по строкам.
 
 function renderDashboard() {
+  // Очки и закрытые темы из localStorage. Читаем один раз: план и плитки
+  // прогресса должны видеть одни и те же цифры.
+  const stored = readProgress();
+
   renderProfileLines();
   renderRootGap();
-  renderPlan();
-  renderProgress();
+  renderPlan(stored);
+  renderProgress(stored);
   renderWeakSpots();
 }
 
@@ -147,19 +153,7 @@ function gradeOfTopic(topicId) {
   return found ? found.grade : null;
 }
 
-// Состояние темы: «в работе» — это текущая тема, остальные ещё впереди.
-// Закрытые темы в plan.items не попадают, они лежат отдельно в closed_gaps.
-function stateOfTopic(topicId) {
-  const found = MOCK.progress.topics.find(function (topic) {
-    return topic.topic_id === topicId;
-  });
-  if (found && found.status === "в работе") {
-    return "current";
-  }
-  return "ahead";
-}
-
-function renderPlan() {
+function renderPlan(stored) {
   const list = document.getElementById("plan-list");
 
   // Сначала уже закрытые пробелы: они ниже корневого по цепочке и показывают
@@ -177,14 +171,35 @@ function renderPlan() {
 
   // Дальше сам план: он начинается с корневого пробела и поднимается вверх,
   // до темы текущего класса.
+  //
+  // Состояние строки. Тема, которую ученик прошёл на экране заданий, —
+  // закрыта (её id лежит в stored.closed). Текущая — ПЕРВАЯ незакрытая
+  // сверху: план идёт снизу вверх по цепочке, и заниматься надо следующей
+  // по ней. Всё, что идёт после текущей, — впереди. Если закрыто всё,
+  // текущей строки нет, и кнопка «Заниматься» не появляется ни у кого.
+  let currentFound = false;
   MOCK.plan.items.forEach(function (item) {
+    let state;
+    let reason = item.reason;
+    if (stored.closed.indexOf(item.topic_id) !== -1) {
+      state = "closed";
+      // Та же фраза, что у закрытых пробелов из mock, только без даты:
+      // дату закрытия мы не храним, а выдумывать её нельзя.
+      reason = "Закрыто. Эта тема больше не мешает.";
+    } else if (!currentFound) {
+      state = "current";
+      currentFound = true;
+    } else {
+      state = "ahead";
+    }
+
     list.append(createPlanRow({
       topicId: item.topic_id,
       title: item.title,
       grade: gradeOfTopic(item.topic_id),
       source: paragraphOnly(item.source_ref),
-      reason: item.reason,
-      state: stateOfTopic(item.topic_id)
+      reason: reason,
+      state: state
     }));
   });
 }
@@ -253,12 +268,18 @@ function createPlanRow(row) {
 
 // --- Блок 3: прогресс --------------------------------------------------------
 
-function renderProgress() {
+function renderProgress(stored) {
   const progress = MOCK.progress;
 
-  document.getElementById("tile-points").textContent = progress.points;
+  // Очки — настоящие, из localStorage: их начисляет экран заданий.
+  document.getElementById("tile-points").textContent = stored.points;
+  // Серия дней остаётся из mock нарочно: считать её по-настоящему мы пока
+  // не умеем, а полусделанный счётчик хуже честной заглушки.
   document.getElementById("tile-streak").textContent = progress.streak_days;
-  document.getElementById("tile-closed").textContent = progress.closed_gaps.length;
+  // Закрытые пробелы: те, что уже были в данных, плюс темы, которые ученик
+  // закрыл сам на экране заданий.
+  document.getElementById("tile-closed").textContent =
+    progress.closed_gaps.length + stored.closed.length;
 
   // Список полученных достижений — это id из mock.js.
   const earnedIds = progress.achievements.map(function (achievement) {
@@ -271,7 +292,8 @@ function renderProgress() {
   const badges = [
     {
       title: "Первый закрытый пробел",
-      earned: earnedIds.indexOf("ach_first_gap") !== -1
+      // Есть хотя бы один закрытый пробел: в данных или закрытый учеником.
+      earned: progress.closed_gaps.length > 0 || stored.closed.length > 0
     },
     {
       title: "Серия 3 дня",

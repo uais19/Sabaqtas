@@ -101,6 +101,10 @@ async function submitForm(event) {
     role: "student"
   });
 
+  // Новый ученик начинает с нуля: очков нет, закрытых тем нет.
+  // Показать здесь что-то другое было бы неправдой.
+  saveProgress({ points: 0, closed: [] });
+
   window.location.href = "diagnostic.html";
 }
 
@@ -133,6 +137,10 @@ function enterAsStudent() {
     deadline: toDateString(demoDeadline),
     role: "student"
   });
+  // Стартовый прогресс демо-ученика: столько же очков, сколько показывал
+  // mock.js, пока очки не стали считаться по-настоящему. Жюри не должно
+  // попадать в пустой кабинет. Закрытых тем нет: их ученик закрывает сам.
+  saveProgress({ points: 340, closed: [] });
   // Ученик начинает с диагностики: жюри проходит весь путь и видит
   // спуск к корневому пробелу — главную идею продукта.
   window.location.href = "diagnostic.html";
@@ -149,6 +157,9 @@ function enterAsTeacher() {
     deadline: "",
     role: "teacher"
   });
+  // У учителя ученического прогресса нет — пишем ноль, чтобы в localStorage
+  // не остался прогресс предыдущего аккаунта.
+  saveProgress({ points: 0, closed: [] });
   window.location.href = "teacher.html";
 }
 

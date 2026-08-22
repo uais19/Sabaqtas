@@ -1,7 +1,10 @@
-// profile.js — чтение профиля ученика из localStorage.
+// profile.js — профиль и прогресс ученика в localStorage.
 // Общий помощник: анкету заполняют на login.html, а показывают её на
 // других экранах. Профиля может не быть — жюри способно открыть любую
 // страницу по прямой ссылке, и это не должно ничего ломать.
+// Здесь же живут очки и закрытые темы (readProgress / saveProgress внизу):
+// их пишет экран темы, читает кабинет, а начальное значение кладёт вход.
+// Одна реализация на все экраны.
 
 // Профиль или null. null значит «профиля нет»: не заполняли, запись битая
 // или localStorage недоступен (приватный режим). Наружу ошибки не выходят.
@@ -87,4 +90,52 @@ function daysUntil(dateString) {
     return null;
   }
   return days;
+}
+
+// --- Прогресс: очки и закрытые темы ------------------------------------------
+//
+// Ключ "sabaqtas-progress", внутри { points: <число>, closed: [<topic_id>, ...] }.
+// points — сумма очков за все пройденные сессии заданий,
+// closed — id тем, в которых ученик прошёл все задания до конца.
+
+// Прогресс с нуля. Каждый раз новый объект: вызывающий код его меняет
+// (прибавляет очки, дописывает тему), и один общий объект на всех был бы
+// ошибкой.
+function emptyProgress() {
+  return { points: 0, closed: [] };
+}
+
+// Сохранённый прогресс или прогресс с нуля. С нуля — при любой неожиданности:
+// записи нет, JSON битый, форма не та, localStorage недоступен (приватный
+// режим). Наружу ошибки не выходят: кабинет обязан открыться в любом случае.
+function readProgress() {
+  try {
+    const raw = localStorage.getItem("sabaqtas-progress");
+    if (!raw) {
+      return emptyProgress();
+    }
+    const progress = JSON.parse(raw);
+    // JSON.parse может вернуть что угодно («null», число, строку).
+    // Прогрессом считаем только объект с числом очков и списком тем.
+    if (!progress || typeof progress !== "object") {
+      return emptyProgress();
+    }
+    if (typeof progress.points !== "number" || !Array.isArray(progress.closed)) {
+      return emptyProgress();
+    }
+    return { points: progress.points, closed: progress.closed };
+  } catch (error) {
+    return emptyProgress();
+  }
+}
+
+// Записать прогресс. Любое обращение к localStorage — через try/catch,
+// как и saveProfile в login.js: в приватном режиме он бросает исключение,
+// а экран из-за этого падать не должен. Причина остаётся в консоли.
+function saveProgress(progress) {
+  try {
+    localStorage.setItem("sabaqtas-progress", JSON.stringify(progress));
+  } catch (error) {
+    console.log("Не удалось сохранить прогресс: " + error.message);
+  }
 }
