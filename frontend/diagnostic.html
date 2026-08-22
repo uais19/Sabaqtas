@@ -6,11 +6,12 @@
   <title>Диагностика — Sabaqtas</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css">
-  <!-- Порядок важен: mock.js готовит данные, api.js их отдаёт,
+  <!-- Порядок важен: mock.js готовит данные, profile.js даёт доступ
+       к localStorage (api.js записывает туда итог), api.js отдаёт данные,
        diagnostic.js рисует экран. defer сохраняет этот порядок. -->
   <script src="js/mock.js" defer></script>
-  <script src="js/api.js" defer></script>
   <script src="js/profile.js" defer></script>
+  <script src="js/api.js" defer></script>
   <script src="js/diagnostic.js" defer></script>
 </head>
 <body>

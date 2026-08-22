@@ -4,7 +4,8 @@
 // страницу по прямой ссылке, и это не должно ничего ломать.
 // Здесь же живут очки и закрытые темы (readProgress / saveProgress внизу):
 // их пишет экран темы, читает кабинет, а начальное значение кладёт вход.
-// Одна реализация на все экраны.
+// И итог диагностики (readDiagnostic / saveDiagnostic): его пишет api.js,
+// когда диагностика закончилась. Одна реализация на все экраны.
 
 // Профиль или null. null значит «профиля нет»: не заполняли, запись битая
 // или localStorage недоступен (приватный режим). Наружу ошибки не выходят.
@@ -137,5 +138,45 @@ function saveProgress(progress) {
     localStorage.setItem("sabaqtas-progress", JSON.stringify(progress));
   } catch (error) {
     console.log("Не удалось сохранить прогресс: " + error.message);
+  }
+}
+
+// --- Итог диагностики --------------------------------------------------------
+//
+// Ключ "sabaqtas-diagnostic", внутри
+//   { root_topic_id: <topic_id или null>, failed: [<topic_id>, ...] }.
+// root_topic_id — корневой пробел, null — пробелов не нашли.
+// failed — все проваленные темы в порядке спуска, сверху вниз.
+
+// Сохранённый итог или null. null — при любой неожиданности: записи нет,
+// JSON битый, форма не та, localStorage недоступен. Наружу ошибки не выходят.
+function readDiagnostic() {
+  try {
+    const raw = localStorage.getItem("sabaqtas-diagnostic");
+    if (!raw) {
+      return null;
+    }
+    const diagnostic = JSON.parse(raw);
+    if (!diagnostic || typeof diagnostic !== "object") {
+      return null;
+    }
+    // root_topic_id — строка или null, failed — массив. Иначе запись битая.
+    const rootOk = diagnostic.root_topic_id === null || typeof diagnostic.root_topic_id === "string";
+    if (!rootOk || !Array.isArray(diagnostic.failed)) {
+      return null;
+    }
+    return { root_topic_id: diagnostic.root_topic_id, failed: diagnostic.failed };
+  } catch (error) {
+    return null;
+  }
+}
+
+// Записать итог. Та же защита, что у saveProgress: ошибка localStorage
+// (приватный режим) не должна ронять экран, причина остаётся в консоли.
+function saveDiagnostic(diagnostic) {
+  try {
+    localStorage.setItem("sabaqtas-diagnostic", JSON.stringify(diagnostic));
+  } catch (error) {
+    console.log("Не удалось сохранить итог диагностики: " + error.message);
   }
 }

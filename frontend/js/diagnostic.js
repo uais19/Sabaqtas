@@ -6,6 +6,7 @@
 let diagnosticId = null;      // id диагностики, его выдаёт бэкенд
 let currentQuestion = null;   // вопрос, который сейчас на экране
 let isWaiting = false;        // пока показываем «верно/неверно», нажатия игнорируем
+let currentRow = null;        // строка лесенки темы, которую сейчас проверяем
 
 // --- Элементы страницы ---
 const stateQuestion = document.getElementById("state-question");
@@ -55,6 +56,8 @@ function wait(ms) {
 // --- Лесенка -------------------------------------------------------------
 
 // Одна строка лесенки: тема слева, класс посередине, отметка справа.
+// topic.is_correct: true/false — тема пройдена/провалена; null — тема ещё
+// проверяется (первый ответ верный, впереди второй вопрос), отметки пока нет.
 // isRoot — это и есть найденный корневой пробел, его выделяем золотым.
 function createStairRow(topic, isRoot) {
   const row = document.createElement("li");
@@ -72,6 +75,7 @@ function createStairRow(topic, isRoot) {
   const status = document.createElement("span");
   status.className = "stair-status";
   if (isRoot) status.textContent = "здесь пробел";
+  else if (topic.is_correct === null) status.textContent = "ещё вопрос";
   else if (topic.is_correct) status.textContent = "✓ понятно";
   else status.textContent = "✕ не получилось";
 
@@ -79,12 +83,19 @@ function createStairRow(topic, isRoot) {
   return row;
 }
 
-// Добавляем в лесенку под вопросом ещё одну пройденную тему.
+// Строка темы в лесенке под вопросом. У темы ОДНА строка, сколько бы
+// вопросов по ней ни задали: после первого ответа строка появляется,
+// после второго — перерисовывается уже с итоговой отметкой.
 function addChainRow(topic) {
   const row = createStairRow(topic, false);
   // Класс запускает короткое появление строки — ученик замечает, что она новая.
   row.classList.add("stair-appear");
-  chainBox.append(row);
+  if (currentRow !== null) {
+    currentRow.replaceWith(row); // тема уже в лесенке — обновляем её строку
+  } else {
+    chainBox.append(row);
+  }
+  currentRow = row;
   chainTitle.classList.remove("is-hidden");
 }
 
@@ -129,12 +140,19 @@ async function handleAnswer(answerText, button) {
     // Подсвечиваем нажатую кнопку: верный ответ зелёным, неверный красным.
     button.classList.add(reply.is_correct ? "is-correct" : "is-wrong");
 
-    // Тема текущего вопроса уходит в лесенку с отметкой.
+    // Тема текущего вопроса — в лесенку. Пока тема не решена (topic_done:
+    // false — первый ответ верный, впереди второй вопрос), отметки нет:
+    // is_correct = null рисует «ещё вопрос». Решённая тема получает ✓ или ✕
+    // по последнему ответу — он её судьбу и решил.
     addChainRow({
       title: currentQuestion.topic_title,
       grade: currentQuestion.grade,
-      is_correct: reply.is_correct
+      is_correct: reply.topic_done ? reply.is_correct : null
     });
+    // Тема решена — следующий вопрос будет по другой теме, ей нужна своя строка.
+    if (reply.topic_done) {
+      currentRow = null;
+    }
 
     await wait(600); // время, чтобы увидеть подсветку
 
@@ -210,6 +228,7 @@ function showError() {
 async function start() {
   errorBox.classList.add("is-hidden");
   chainBox.textContent = "";
+  currentRow = null;
   chainTitle.classList.add("is-hidden");
   stateResult.classList.add("is-hidden");
   stateQuestion.classList.remove("is-hidden");
