@@ -6,7 +6,11 @@ from app.domain.progress import StudentTopicProgress
 
 
 class StudentLookup(Protocol):
-    async def get_by_user_id(self, user_id: UUID): ...
+    async def get_by_user_id(self, user_id: UUID) -> "StudentIdentity | None": ...
+
+
+class StudentIdentity(Protocol):
+    id: UUID
 
 
 class ProgressService:

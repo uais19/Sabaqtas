@@ -25,8 +25,16 @@ class TeacherService:
 
 
 class TeacherLookup(Protocol):
-    async def get_by_user_id(self, user_id: UUID): ...
+    async def get_by_user_id(self, user_id: UUID) -> "TeacherIdentity | None": ...
 
 
 class ClassLookup(Protocol):
-    async def get_by_id(self, class_id: UUID): ...
+    async def get_by_id(self, class_id: UUID) -> "ClassIdentity | None": ...
+
+
+class TeacherIdentity(Protocol):
+    id: UUID
+
+
+class ClassIdentity(Protocol):
+    teacher_id: UUID

@@ -1,5 +1,7 @@
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
+from typing import cast
 from uuid import UUID, uuid4
 
 from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, select
@@ -59,12 +61,13 @@ class SqlAlchemyDiagnosticRepository:
         self.session = session
 
     @asynccontextmanager
-    async def transaction(self):
+    async def transaction(self) -> AsyncIterator[None]:
         async with self.session.begin():
             yield
 
     async def get_student_id(self, user_id: UUID) -> UUID | None:
-        return await self.session.scalar(select(StudentRecord.id).where(StudentRecord.user_id == user_id))
+        statement = select(StudentRecord.id).where(StudentRecord.user_id == user_id)
+        return cast(UUID | None, await self.session.scalar(statement))
 
     async def start(self, student_id: UUID, subject_code: str, grade: int) -> tuple[Diagnostic, DiagnosticQuestion] | None:
         subject = await self.session.scalar(select(SubjectRecord).where(SubjectRecord.code == subject_code))
