@@ -47,9 +47,28 @@ const TOPIC = findTopicInfo(TOPIC_ID);
 // в шапку темы и в плашку источника под разбором задания.
 const MATERIAL = TOPIC_DATA.material;
 
-// Три задания на тему — первые три из списка, в порядке файла.
-// Подбор заданий по сложности — следующий шаг, здесь его ещё нет.
-const TASKS = TOPIC_DATA.tasks.slice(0, 3);
+// Все задания темы: пять штук, у каждого сложность 1, 2 или 3.
+// За сессию показываем три, и какие именно — зависит от ответов ученика
+// (см. pickNextTask ниже).
+const ALL_TASKS = TOPIC_DATA.tasks;
+
+// Сколько заданий в одной сессии.
+const SESSION_LENGTH = 3;
+
+// --- Подстройка сложности ----------------------------------------------------
+//
+// Целевая сложность начинается с обычной (2). Каждое следующее задание —
+// ещё не показанное, чья сложность ближе всего к цели. После каждого
+// ЗАВЕРШЁННОГО задания (не после каждого клика) цель сдвигается:
+//   решил с первой попытки                -> на ступень выше (не больше 3)
+//   решил после ошибок или открыл ответ   -> на ступень ниже (не меньше 1)
+// Третьего исхода у задания нет.
+// Сдвигаем после каждого задания, а не после двух подряд, нарочно: сессия
+// длится всего три задания, более медленное правило не успело бы сработать
+// на глазах у ученика.
+const TARGET_START = 2;
+const MIN_DIFFICULTY = 1;
+const MAX_DIFFICULTY = 3;
 
 // Очки: с первой попытки — 10, после ошибок — 5, за показанный ответ — 0.
 const POINTS_FIRST_TRY = 10;
@@ -65,6 +84,8 @@ let attempts = 0;         // неудачные попытки на текуще
 let points = 0;           // набрано очков за тему
 let firstTryCount = 0;    // сколько заданий решено с первой попытки
 let answerButtons = [];   // кнопки вариантов текущего задания
+let target = TARGET_START; // целевая сложность следующего задания
+const shownTasks = [];    // задания этой сессии в порядке показа
 
 // --- Запуск ------------------------------------------------------------------
 
@@ -113,13 +134,86 @@ function createSourceBadge() {
 
 // --- Задание -----------------------------------------------------------------
 
+// Какое задание показать следующим: ещё не показанное, чья сложность ближе
+// всего к целевой. При равной близости берём более простое — когда не
+// уверены, лучше быть добрее. Если и сложность равна, остаётся то, что
+// раньше в списке.
+function pickNextTask() {
+  let best = null;
+
+  ALL_TASKS.forEach(function (task) {
+    if (shownTasks.indexOf(task) !== -1) {
+      return; // уже показывали в этой сессии
+    }
+    if (best === null) {
+      best = task;
+      return;
+    }
+    const distance = Math.abs(task.difficulty - target);
+    const bestDistance = Math.abs(best.difficulty - target);
+    const closer = distance < bestDistance;
+    const sameDistanceButEasier = distance === bestDistance && task.difficulty < best.difficulty;
+    if (closer || sameDistanceButEasier) {
+      best = task;
+    }
+  });
+
+  return best;
+}
+
+// Сложность числом -> словом. Неизвестное число — пустая строка.
+function difficultyLabel(difficulty) {
+  if (difficulty === 1) return "простой";
+  if (difficulty === 2) return "обычный";
+  if (difficulty === 3) return "сложный";
+  return "";
+}
+
+// Подстройка после ЗАВЕРШЁННОГО задания. Решил с первой попытки — цель
+// на ступень выше; решил после ошибок или открыл ответ — на ступень ниже.
+function adjustTarget(solvedFirstTry) {
+  if (solvedFirstTry) {
+    target = Math.min(MAX_DIFFICULTY, target + 1);
+  } else {
+    target = Math.max(MIN_DIFFICULTY, target - 1);
+  }
+}
+
+// Строка «Задание 2 из 3 · обычный уровень». Если сложность отличается от
+// прошлого задания, добавляем «— стало проще» или «— стало сложнее»:
+// подстройка должна быть видна, а не только работать. На первом задании
+// сравнивать не с чем, поэтому хвоста нет.
+function renderProgress(task) {
+  const progress = document.getElementById("task-progress");
+  progress.textContent = "Задание " + (taskIndex + 1) + " из " + SESSION_LENGTH +
+    " · " + difficultyLabel(task.difficulty) + " уровень";
+
+  if (taskIndex === 0) {
+    return;
+  }
+  const previous = shownTasks[taskIndex - 1];
+  if (task.difficulty === previous.difficulty) {
+    return;
+  }
+
+  // Хвост тем же приглушённым стилем, что и ссылка на параграф в шапке.
+  const tail = document.createElement("span");
+  tail.className = "topic-source";
+  if (task.difficulty < previous.difficulty) {
+    tail.textContent = " — стало проще";
+  } else {
+    tail.textContent = " — стало сложнее";
+  }
+  progress.append(tail);
+}
+
 function renderTask() {
-  const task = TASKS[taskIndex];
+  const task = pickNextTask();
+  shownTasks.push(task);
   attempts = 0;
   answerButtons = [];
 
-  document.getElementById("task-progress").textContent =
-    "Задание " + (taskIndex + 1) + " из " + TASKS.length;
+  renderProgress(task);
   document.getElementById("task-text").textContent = task.text;
 
   const answers = document.getElementById("task-answers");
@@ -141,7 +235,7 @@ function renderTask() {
 }
 
 function checkAnswer(index, button) {
-  const task = TASKS[taskIndex];
+  const task = shownTasks[taskIndex];
 
   if (index === task.correct_index) {
     button.classList.add("is-correct");
@@ -153,6 +247,9 @@ function checkAnswer(index, button) {
     } else {
       points += POINTS_LATER;
     }
+
+    // Задание завершено — подстраиваем сложность следующего.
+    adjustTarget(attempts === 0);
 
     showCorrect(task);
     return;
@@ -196,7 +293,7 @@ function createNextButton() {
   const button = document.createElement("button");
   button.className = "button button-primary";
   button.type = "button";
-  if (taskIndex === TASKS.length - 1) {
+  if (taskIndex === SESSION_LENGTH - 1) {
     button.textContent = "Посмотреть итог";
   } else {
     button.textContent = "Следующее задание";
@@ -256,10 +353,13 @@ function showWrong(task) {
 
 // Ученик попросил показать ответ. Очков за это задание не даём.
 function revealAnswer() {
-  const task = TASKS[taskIndex];
+  const task = shownTasks[taskIndex];
 
   answerButtons[task.correct_index].classList.add("is-correct");
   disableAnswers();
+
+  // Ответ открыт — задание завершено без решения, цель на ступень ниже.
+  adjustTarget(false);
 
   const feedback = document.getElementById("task-feedback");
   feedback.textContent = "";
@@ -285,7 +385,7 @@ function revealAnswer() {
 
 function nextTask() {
   taskIndex++;
-  if (taskIndex >= TASKS.length) {
+  if (taskIndex >= SESSION_LENGTH) {
     showSummary();
     return;
   }
@@ -301,7 +401,7 @@ function showSummary() {
   document.getElementById("summary-text").textContent =
     "Задания закончились. Ты набрал " + points + " очков.";
   document.getElementById("summary-detail").textContent =
-    "С первой попытки: " + firstTryCount + " из " + TASKS.length;
+    "С первой попытки: " + firstTryCount + " из " + SESSION_LENGTH;
 }
 
 // Запускаем в самом низу файла: константы выше объявлены через const,
