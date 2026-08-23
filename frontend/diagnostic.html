@@ -9,6 +9,9 @@
   <!-- Порядок важен: mock.js готовит данные, profile.js даёт доступ
        к localStorage (api.js записывает туда итог), api.js отдаёт данные,
        diagnostic.js рисует экран. defer сохраняет этот порядок. -->
+  <!-- Язык интерфейса. Подключается первым: остальные скрипты
+       могут звать t() при отрисовке. -->
+  <script src="js/i18n.js" defer></script>
   <script src="js/mock.js" defer></script>
   <script src="js/profile.js" defer></script>
   <script src="js/api.js" defer></script>

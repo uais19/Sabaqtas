@@ -16,6 +16,9 @@
        menu.js открывает и закрывает мобильное меню.
        Это все скрипты лендинга: mock.js и api.js подключаются
        на тех экранах, где реально нужны данные. -->
+  <!-- Язык интерфейса. Подключается первым: остальные скрипты
+       могут звать t() при отрисовке. -->
+  <script src="js/i18n.js" defer></script>
   <script src="js/nav.js" defer></script>
   <script src="js/menu.js" defer></script>
   <script src="js/reveal.js" defer></script>
@@ -48,6 +51,11 @@
         <a class="nav-link" href="chat.html">Чат с ИИ</a>
         <a class="nav-link" href="dashboard.html">Мой план</a>
       </nav>
+
+      <!-- Сюда i18n.js вставит переключатель «Рус / Қаз».
+           Пустой контейнер, а не готовые кнопки: если скрипт не
+           загрузился, в шапке не останется нерабочих кнопок. -->
+      <div id="ui-lang-slot"></div>
 
       <a class="header-link" href="teacher.html">Войти как учитель</a>
     </div>

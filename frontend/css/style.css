@@ -2238,3 +2238,38 @@ h1 {
 .speak-button:disabled::before {
   content: "";
 }
+
+/* --- Переключатель языка интерфейса ------------------------------------
+   Стоит в шапке лендинга и анкеты: язык выбирается на входе и дальше
+   не мешается на экране. Вид проще, чем у переключателя языка ответов
+   в чате: это настройка, а не действие ученика.
+   ---------------------------------------------------------------------- */
+
+.ui-lang-switch {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.ui-lang-button {
+  min-height: 36px;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.ui-lang-button:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Выбранный язык залит акцентом — как активная кнопка режима в чате */
+.ui-lang-button.is-active {
+  color: #FFFFFF;
+  background-color: var(--accent);
+  border-color: var(--accent);
+}

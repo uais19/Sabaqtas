@@ -8,6 +8,9 @@
   <link rel="stylesheet" href="css/style.css">
   <!-- Порядок важен: mock.js готовит данные, dashboard.js их рисует.
        defer сохраняет этот порядок. -->
+  <!-- Язык интерфейса. Подключается первым: остальные скрипты
+       могут звать t() при отрисовке. -->
+  <script src="js/i18n.js" defer></script>
   <script src="js/mock.js" defer></script>
   <script src="js/profile.js" defer></script>
   <script src="js/dashboard.js" defer></script>
