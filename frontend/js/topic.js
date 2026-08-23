@@ -118,6 +118,36 @@ function renderMaterial() {
   // Книга и параграф — без страницы, как и везде на этих экранах.
   document.getElementById("material-source").textContent =
     "Источник: " + paragraphOnly(MATERIAL.source_ref);
+
+  addMaterialSpeakButton();
+}
+
+// Кнопка «Прослушать» под правилом из учебника.
+//
+// Правило — самый плотный текст на экране: формулировка из учебника,
+// её читают медленно. Тем, кому читать с экрана тяжело, проще послушать.
+//
+// createSpeakButton живёт в speech.js и вернёт null, если браузер
+// не умеет говорить. Тогда экран остаётся ровно таким, как был.
+// Язык здесь всегда русский: правило взято из русского издания учебника.
+function addMaterialSpeakButton() {
+  if (typeof createSpeakButton !== "function") {
+    return;
+  }
+  const button = createSpeakButton(
+    function () { return MATERIAL.text; },
+    function () { return "ru"; }
+  );
+  if (!button) {
+    return;
+  }
+  const row = document.createElement("div");
+  row.className = "speak-row";
+  row.append(button);
+  // Ставим под строкой источника: сначала правило и откуда оно,
+  // потом вспомогательное действие.
+  const source = document.getElementById("material-source");
+  source.parentNode.insertBefore(row, source.nextSibling);
 }
 
 // Такая же плашка источника, как в чате: те же классы, тот же вид.

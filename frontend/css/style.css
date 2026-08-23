@@ -2179,3 +2179,62 @@ h1 {
 .wordmark-mark {
   flex-shrink: 0;
 }
+
+/* --- Кнопка «Прослушать» -----------------------------------------------
+   Озвучка ответа и правила из учебника: доступность для тех, кому
+   читать с экрана тяжело. Кнопка нарочно тихая — она помощник,
+   а не главное действие на экране, и не должна спорить с ответом ИИ.
+   ---------------------------------------------------------------------- */
+
+.speak-row {
+  align-self: flex-start;
+  max-width: 85%;
+}
+
+.speak-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 12px;
+  cursor: pointer;
+}
+
+/* Значок динамика рисуем текстом, чтобы не тащить картинку:
+   страница должна оставаться лёгкой на медленном интернете. */
+.speak-button::before {
+  content: "▶";
+  font-size: 10px;
+}
+
+.speak-button:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Пока идёт чтение, кнопка подсвечена и предлагает остановить */
+.speak-button.is-speaking {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.speak-button.is-speaking::before {
+  content: "■";
+}
+
+/* Голоса для языка нет — кнопка гаснет и больше не нажимается */
+.speak-button:disabled {
+  color: var(--muted);
+  border-color: var(--border);
+  cursor: default;
+  opacity: 0.7;
+}
+
+.speak-button:disabled::before {
+  content: "";
+}

@@ -47,6 +47,29 @@ function addBubble(from, text, muted) {
   return bubble;
 }
 
+// Кнопка «Прослушать» под ответом ИИ.
+//
+// createSpeakButton живёт в speech.js и возвращает null, если браузер
+// не умеет синтезировать речь. Тогда просто ничего не добавляем —
+// экран должен работать и в таком браузере.
+function addSpeakButton(text) {
+  if (typeof createSpeakButton !== "function") {
+    return;
+  }
+  const button = createSpeakButton(
+    function () { return text; },
+    function () { return lang; }
+  );
+  if (!button) {
+    return;
+  }
+  const row = document.createElement("div");
+  row.className = "speak-row";
+  row.append(button);
+  messagesBox.append(row);
+  scrollToBottom();
+}
+
 // «часть 1» -> «ч.1», чтобы строка источника оставалась короткой.
 function shortPart(part) {
   return part ? part.replace("часть ", "ч.") : "";
@@ -134,6 +157,15 @@ function addCacheNote() {
 function showAnswer(data, fromCache) {
   // found: false — честный отказ, рисуем спокойно и без источников.
   addBubble("ai", data.answer, data.found === false);
+
+  // Кнопка «Прослушать» — только под настоящим ответом. Под отказом
+  // «Этого нет в загруженных учебниках» озвучивать нечего.
+  //
+  // Язык берём в момент нажатия, а не сейчас: ученик мог переключить
+  // Рус/Қаз уже после того, как ответ появился на экране.
+  if (data.found !== false) {
+    addSpeakButton(data.answer);
+  }
 
   // Плашку источника рисуем только когда источники реально есть.
   if (Array.isArray(data.sources) && data.sources.length > 0) {
