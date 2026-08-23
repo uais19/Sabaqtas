@@ -44,7 +44,6 @@
            и подсвечивает её — сразу и здесь, и в мобильном меню. -->
       <nav class="header-nav">
         <a class="nav-link" data-nav="problem" href="#problem">Проблема</a>
-        <a class="nav-link" data-nav="solution" href="#solution">Решение</a>
         <a class="nav-link" data-nav="example" href="#example">Пример</a>
         <a class="nav-link" data-nav="how" href="#how">Как это работает</a>
         <a class="nav-link" data-nav="teachers" href="#teachers">Учителям</a>
@@ -52,12 +51,13 @@
         <a class="nav-link" href="dashboard.html">Мой план</a>
       </nav>
 
-      <!-- Сюда i18n.js вставит переключатель «Рус / Қаз».
-           Пустой контейнер, а не готовые кнопки: если скрипт не
-           загрузился, в шапке не останется нерабочих кнопок. -->
-      <div id="ui-lang-slot"></div>
-
       <a class="header-link" href="teacher.html">Войти как учитель</a>
+
+      <!-- Переключатель «Рус / Қаз» стоит последним, у самого края:
+           это настройка, а не пункт навигации. Пустой контейнер,
+           а не готовые кнопки: если i18n.js не загрузился,
+           в шапке не останется мёртвых кнопок. -->
+      <div id="ui-lang-slot"></div>
     </div>
   </header>
 
@@ -67,7 +67,6 @@
   <!-- Мобильное меню: выезжает слева -->
   <nav class="menu-panel" id="mobile-menu" aria-label="Мобильное меню">
     <a class="menu-link" data-nav="problem" href="#problem">Проблема</a>
-    <a class="menu-link" data-nav="solution" href="#solution">Решение</a>
     <a class="menu-link" data-nav="example" href="#example">Пример</a>
     <a class="menu-link" data-nav="how" href="#how">Как это работает</a>
     <a class="menu-link" data-nav="teachers" href="#teachers">Учителям</a>
