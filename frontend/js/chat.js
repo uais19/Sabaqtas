@@ -386,3 +386,34 @@ function applyModeFromUrl() {
 }
 
 applyModeFromUrl();
+
+// --- Класс из анкеты ---
+
+// Класс ученика уже спрашивали при входе — второй раз спрашивать незачем.
+// Ставим его в переключатель как начальное значение; поменять руками
+// по-прежнему можно, если ученик хочет объяснение попроще или посложнее.
+//
+// Молча ничего не делаем, когда: профиля нет (жюри открыло страницу по
+// прямой ссылке), класс не записан или такого варианта нет в списке.
+// Во всех трёх случаях остаётся 8 класс, выбранный в разметке.
+function applyGradeFromProfile() {
+  // readProfile живёт в profile.js. Если файл почему-то не подключился,
+  // экран должен работать дальше, а не падать целиком.
+  if (typeof readProfile !== "function") {
+    return;
+  }
+  const profile = readProfile();
+  if (!profile || !profile.grade) {
+    return;
+  }
+  const wanted = String(profile.grade);
+  const options = gradeSelect.options;
+  for (let i = 0; i < options.length; i++) {
+    if (options[i].value === wanted) {
+      gradeSelect.value = wanted;
+      return;
+    }
+  }
+}
+
+applyGradeFromProfile();

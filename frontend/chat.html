@@ -6,7 +6,10 @@
   <title>Чат с ИИ — Sabaqtas</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css">
-  <!-- Этот экран ходит прямо в /api/ask, поэтому mock.js и api.js не нужны -->
+  <!-- Этот экран ходит прямо в /api/ask, поэтому mock.js и api.js не нужны.
+       profile.js нужен ради одного: подставить класс из анкеты в
+       переключатель. Оба с defer, поэтому выполнятся в этом порядке. -->
+  <script src="js/profile.js" defer></script>
   <script src="js/chat.js" defer></script>
 </head>
 <body class="chat-body">
