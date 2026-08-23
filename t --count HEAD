@@ -1,0 +1,393 @@
+[33mcommit 4a03bda9242b7af867d4d2044c50ac5fc9a03042[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Sun Aug 23 21:30:04 2026 +0500
+
+    чат: класс берётся из анкеты, а не всегда 8
+
+[33mcommit a078f415daf6889f4cf983a8878ecc6564739cd9[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Sun Aug 23 21:20:00 2026 +0500
+
+    порог: второе условие — тема должна выделяться на фоне учебника
+
+[33mcommit 69181bd23cf8cca7dc75b1bc9952c7e0fee89323[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Sun Aug 23 19:13:30 2026 +0500
+
+    Инструкция для презентации и поправка README про сохранение прогресса
+
+[33mcommit a41015a778818509919c26e4e4abff3628646a86[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Sun Aug 23 19:08:02 2026 +0500
+
+    инструкция по презентации
+
+[33mcommit 27b62f3a1c529fabfdb638ab3bed97442d27dd50[m
+Author: unknown <zxcfunqw@gmail.com>
+Date:   Sat Aug 22 19:09:19 2026 +0500
+
+     backend upd, implemented backend core
+
+[33mcommit bff2c35a4f3b3e237c163e204f06e6222c35a974[m
+Merge: f0c2684 cff53cc
+Author: unknown <zxcfunqw@gmail.com>
+Date:   Sat Aug 22 18:54:17 2026 +0500
+
+    backend upd
+    Merge branch 'main' of https://github.com/uais19/Sabaqtas
+
+[33mcommit f0c2684f660bca006cf88981b02cb3e8bcc5019a[m
+Merge: 108d4a3 6b65357
+Author: unknown <zxcfunqw@gmail.com>
+Date:   Sat Aug 22 18:52:17 2026 +0500
+
+    added backend
+
+[33mcommit cff53ccb7861ca5446ef06e70e6535b3f48ea0b1[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Sat Aug 22 17:33:33 2026 +0500
+
+    панель учителя и кабинет: параграфы вместо страниц, честные данные, мягче формулировки
+
+[33mcommit 08161003e1fc83899b3a799a46b72f770e3e7297[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Sat Aug 22 17:17:59 2026 +0500
+
+    диагностика: два вопроса на тему, остановка после двух пройденных подряд
+
+[33mcommit 749349e2e2e7eb4328a0e4a573d2d9579888c249[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Sat Aug 22 16:11:48 2026 +0500
+
+    очки и закрытые темы считаются по-настоящему
+
+[33mcommit 3fbb3a2eca5a88de2a4b65f0addda1c37595f18e[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Sat Aug 22 14:28:14 2026 +0500
+
+    темы: сложность подстраивается под ответы ученика
+
+[33mcommit 77931dd5eb86d46d57e0047898a88a68ab7dea6b[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Sat Aug 22 13:38:21 2026 +0500
+
+    темы: задания в данных, переход по плану, четыре темы вместо одной
+
+[33mcommit 9e0d5c8fc13393a9113b02414ea315482fc3db88[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Sat Aug 22 13:09:33 2026 +0500
+
+    пул моделей: реальные имена и честное сообщение об ошибке
+
+[33mcommit fc016b15a5359cf42d57e21aa2bd1666f7c6ad97[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Sat Aug 22 12:57:25 2026 +0500
+
+    кабинет: ближайшая цель и обратный отсчёт до даты
+
+[33mcommit 533060b53f9b5f308dc850d5aefd6eb81ec35caf[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Sat Aug 22 12:50:01 2026 +0500
+
+    анкета: классы 7-11, олимпиада в целях, уровень подготовки
+
+[33mcommit 4da2bf607c29af6946342e247c3302517c6fdf0c[m
+Author: uais19 <ula.3003228@gmail.com>
+Date:   Sat Aug 22 00:29:08 2026 +0500
+
+    Update README.md
+
+[33mcommit fb497e87998f7e07caaa83cc0fbbfd622b4ca8c5[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Sat Aug 22 00:17:28 2026 +0500
+
+    README: описание реальной архитектуры вместо FastAPI и Supabase
+
+[33mcommit 2cf61b0fbd034d0e7630f47c1dce95b05f6aa99e[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Sat Aug 22 00:10:54 2026 +0500
+
+    заголовок: крутим реальные темы вместо предметов, которых нет
+
+[33mcommit 58507f162a684d082fd3f02bb499d47f84d11cb9[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Fri Aug 21 23:39:16 2026 +0500
+
+    экран входа: честный текст без обещания подстройки
+
+[33mcommit 466d1813c467bd36630353586eae810e8ca5aeda[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Fri Aug 21 18:58:14 2026 +0500
+
+    лендинг: текст карточки без заглушки, логотип-лесенка и favicon
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit 5450bf49c2a7f1394ce127aebaee895aefc2de6f[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Fri Aug 21 18:55:04 2026 +0500
+
+    диагностика: источник без страницы, как на остальных экранах
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit 0d337c43f5686eda460f13b54a8f44d5f03c71d4[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Fri Aug 21 18:37:18 2026 +0500
+
+    заготовки: ключ без класса, попадание при любом выборе
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit 74888c28a965d3adf2a62d8eb47d5135889471b2[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Fri Aug 21 18:34:35 2026 +0500
+
+    цель в кабинете объясняет, почему план начинается снизу
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit 76a21f78a4a59048527747a5e4b8fdcbea525c79[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Fri Aug 21 18:30:44 2026 +0500
+
+    плашка источника: никогда не показываем страницу
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit b4ea87f69415614b283e15a0e62cae1a24613aff[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Fri Aug 21 17:21:10 2026 +0500
+
+    профиль: имя и цель на экранах, классы 8-9
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit b626f6972b1e0aa30846c873506f94703168762c[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Fri Aug 21 17:14:12 2026 +0500
+
+    chunks.json: алгебра 7 и 8 класс, математика 6 класс
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit 5f1ee7c7b82844b6836a4eda324b45a0ade1716b[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Fri Aug 21 16:30:34 2026 +0500
+
+    экран входа: анкета, демо-вход за ученика и за учителя
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit 7d44acc36b8fa0c2121ff3c2c7e81b930ac4a454[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Fri Aug 21 16:05:55 2026 +0500
+
+    заготовленные ответы: answers.json и сборщик
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit 188eb1e6e9d07171ec5fe2d17e3f866e74228903[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Fri Aug 21 15:31:49 2026 +0500
+
+    наставник: искать фрагменты по первому вопросу диалога
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit 97c3bde35d274caca80978260c46c0e730ebee26[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Fri Aug 21 14:41:03 2026 +0500
+
+    кэш: не кэшировать реплики внутри диалога наставника
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit c53e2bbef1ea332d641b5d6672657011751da36d[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Fri Aug 21 14:38:39 2026 +0500
+
+    кэш: не кэшировать реплики внутри диалога наставника
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit 7c5bee2b05191391b818dbb949cf1f860a3ece21[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Fri Aug 21 14:17:08 2026 +0500
+
+    ссылки на кабинет: фикс мёртвой plan.html и пункт «Мой план» в шапке
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit 108d4a356ad6993fbf24c4a73ef48878e5908223[m
+Author: unknown <zxcfunqw@gmail.com>
+Date:   Fri Aug 21 14:09:24 2026 +0500
+
+    partly aded backend core
+
+[33mcommit 6b65357d766cdcd9b920bb15441d620685bbbfdc[m
+Merge: d0bc54f 6714108
+Author: zxcfunqw-design <zxcfunqw@gmail.com>
+Date:   Fri Aug 21 14:08:18 2026 +0500
+
+    Merge pull request #1 from zxcfunqw-design/main
+    
+    Merge pull request #1 from uais19/main
+
+[33mcommit 671410869521eb9a29c4e460989bcfa179f1c2b7[m
+Merge: 2efbbb7 d0bc54f
+Author: zxcfunqw-design <zxcfunqw@gmail.com>
+Date:   Fri Aug 21 14:04:45 2026 +0500
+
+    Merge pull request #1 from uais19/main
+    
+    small refactor of ui
+
+[33mcommit d0bc54fc7d0b6aeabf7b42282da7ad1f8bcb450c[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Fri Aug 21 14:00:15 2026 +0500
+
+    Личный кабинет и экран темы: план, прогресс, задания без показа ответа
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit 288f48b0b4e1136f25a29cddec56b1979df7f586[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Fri Aug 21 13:39:24 2026 +0500
+
+    Кэш ответов: localStorage в браузере и Map на сервере, экономим дневную квоту
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit c866788f2736b1da718e74af162b807f413c19aa[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Fri Aug 21 13:33:45 2026 +0500
+
+    Запасные модели Gemini: при исчерпании дневного лимита берём следующую
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit 054f74ee57c34ea80ffb692275e1faeaabf3ad41[m
+Author: unknown <zxcfunqw@gmail.com>
+Date:   Fri Aug 21 11:09:17 2026 +0500
+
+    small refactor of ui
+
+[33mcommit 2efbbb77e0030ba24b4af1c0f036ddea89d2b599[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Fri Aug 21 00:09:40 2026 +0500
+
+    Повтор запросов к Gemini при лимите частоты, понятное сообщение о 503
+    
+    Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
+
+[33mcommit abde332ed80841e5c3c8d03829dcbac0d4b554c7[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Fri Aug 21 00:04:41 2026 +0500
+
+    Панель учителя: плитки, таблица учеников, блок «Что западает у класса»
+    
+    Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
+
+[33mcommit fe63c5c32da792f8fad90d06e86a271871f3982a[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Thu Aug 20 23:51:49 2026 +0500
+
+    Настоящий текст учебника: §21-23 математики за 5 класс
+
+[33mcommit 88897de1f79616ee89f30d7199a9efedfa9647f2[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Thu Aug 20 23:45:34 2026 +0500
+
+    Сборка RAG из реальных фрагментов учебника вместо тестовых
+    
+    Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
+
+[33mcommit 94c5d22ae6295f49e88c0c7d47dac5ecb18ff425[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Thu Aug 20 22:37:35 2026 +0500
+
+    Навигация на экран чата: шапка, секция «Решение», итог диагностики
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit 7615e8729c74dacd4a457cb1bd8f7a514f0fed69[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Thu Aug 20 22:28:31 2026 +0500
+
+    Чат: выбор класса, тихая строка источника, наставник без отказов по классу
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit fef2e642e24566a8d6ae677995b63148769a6d7c[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Thu Aug 20 22:17:18 2026 +0500
+
+    Реальная цепочка тем из учебников вместо тестовой
+    
+    Цепочка 8→7→6→5, корневой пробел — сложение обыкновенных дробей
+    за 5 класс. Все ссылки на параграфы и страницы настоящие.
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit d2cde7c22fc216580be1a31c22a6baa7a135e071[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Thu Aug 20 22:17:18 2026 +0500
+
+    Правило работы: коммит и пуш после каждого изменения
+    
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
+[33mcommit 7b8569cefaaf94e59753698d785324ad50d2d449[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Thu Aug 20 19:45:46 2026 +0500
+
+    Промпт: применение правил разрешено, ответы на двух языках
+
+[33mcommit 4ae2c0384ad29603af0031401d62be54d05be09d[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Thu Aug 20 19:19:29 2026 +0500
+
+    Промпт: разрешено применять правила из учебника, запрещено добавлять свои
+
+[33mcommit ab65da3e0020945868cff955dba36f6897e955f7[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Thu Aug 20 19:09:17 2026 +0500
+
+    Фикс: found не противоречит ответу, пометка заглушек вне текста
+
+[33mcommit 4b43ee293f6f7ebf46b8243dec28c608538c4a8a[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Thu Aug 20 02:24:03 2026 +0500
+
+    Serverless: эндпоинт /api/ask, промпты, порог отсечения
+
+[33mcommit 96775f28ae009928e73022d248ea6e42c334943f[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Thu Aug 20 01:51:13 2026 +0500
+
+    RAG: скрипт сборки эмбеддингов, тестовые куски, chunks.json
+
+[33mcommit a867fc89fe3afbee9b64ba2b896d93c7804328b3[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Wed Aug 19 14:37:47 2026 +0500
+
+    диагностика
+
+[33mcommit e8ca050e22f37cc1e1d09d6c76dd51e93029fab9[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Wed Aug 19 14:19:15 2026 +0500
+
+    Экран диагностики, анимации, заменяющиеся слова
+
+[33mcommit 8f4f5c32cfc1e9d9c5b0ec748465d9d9fd27721e[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Wed Aug 19 00:09:12 2026 +0500
+
+    лендинг: секции, навигация, мобильное меню
+
+[33mcommit 82e61af57790b7b782147f2d132e33cd95078889[m
+Author: Uais <ula.3003228@gmail.com>
+Date:   Tue Aug 18 01:06:03 2026 +0500
+
+    каркас проекта: структура, правила, моки

@@ -8,6 +8,24 @@
 // Готового сценария ответов здесь нет: api.js сравнивает выбранный вариант
 // с correct_index и сам решает, спускаться ниже или заканчивать.
 
+// Дата вчерашнего дня в виде «2026-08-22».
+//
+// Нужна для демонстрационной закрытой темы ниже. Раньше там стояло
+// записанное руками число, и через неделю оно превращалось в «закрыто
+// девять дней назад» у ученика, который только что зарегистрировался.
+//
+// Собираем строку из getFullYear/getMonth/getDate, а НЕ через toISOString:
+// toISOString переводит время в UTC, и поздним вечером по Казахстану
+// (UTC+5) дата уехала бы на день назад.
+function yesterdayIso() {
+  const date = new Date();
+  date.setDate(date.getDate() - 1);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return year + "-" + month + "-" + day;
+}
+
 const MOCK = {
 
   // Цепочка тем-пререквизитов: сверху тема текущего класса, ниже — то,
@@ -182,7 +200,9 @@ const MOCK = {
       { topic_id: "t_8_kvadr", title: "Квадратные уравнения", grade: 8, mastery: 5, status: "не начата" }
     ],
     closed_gaps: [
-      { topic_id: "t_5_umn", title: "Умножение и деление", grade: 5, closed_at: "2026-08-14" }
+      // Дата считается от сегодняшнего дня, а не записана руками:
+      // иначе демонстрация со временем начинает показывать старое число.
+      { topic_id: "t_5_umn", title: "Умножение и деление", grade: 5, closed_at: yesterdayIso() }
     ],
     points: 340,
     streak_days: 5,

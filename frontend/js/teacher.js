@@ -11,19 +11,26 @@ if (typeof TEACHER_MOCK === "undefined") {
 function renderTeacherPage() {
   const students = TEACHER_MOCK.students;
   let closedGaps = 0;
-  let gaveUpCount = 0;
+  let stuckStudents = 0;
 
   document.getElementById("class-title").textContent = TEACHER_MOCK.class_title;
 
   // Считаем две общие величины из карточки каждого ученика.
+  //
+  // Закрытые пробелы складываем: это события, их сумма осмысленна.
+  // А застрявших СЧИТАЕМ ПО ГОЛОВАМ, а не складываем застревания. Иначе
+  // выходит бессмыслица: у пятерых учеников набирается семь застреваний,
+  // и плитка показывает «застряли 7» при пяти учениках в классе.
   students.forEach(function (student) {
     closedGaps += student.closed_gaps;
-    gaveUpCount += student.gave_up_count;
+    if (student.gave_up_count > 0) {
+      stuckStudents += 1;
+    }
   });
 
   document.getElementById("tile-students").textContent = students.length;
   document.getElementById("tile-closed").textContent = closedGaps;
-  document.getElementById("tile-gaveup").textContent = gaveUpCount;
+  document.getElementById("tile-gaveup").textContent = stuckStudents;
 
   const studentsBody = document.getElementById("students-body");
   students.forEach(function (student) {
@@ -108,6 +115,30 @@ function createStudentRow(student) {
   return row;
 }
 
+// Согласуем существительное с числом: 1 ученик, 2 ученика, 5 учеников.
+// forms — три формы подряд: для 1, для 2–4, для 5 и больше.
+//
+// Дробное число всегда берёт вторую форму: «3.7 подсказки», «1.4 подсказки».
+// Так в русском языке и есть, отдельного правила придумывать не нужно.
+function plural(count, forms) {
+  if (count % 1 !== 0) {
+    return forms[1];
+  }
+  const hundreds = Math.abs(count) % 100;
+  const units = hundreds % 10;
+  // Числа от 11 до 14 — исключение: «11 учеников», а не «11 ученик».
+  if (hundreds > 10 && hundreds < 20) {
+    return forms[2];
+  }
+  if (units > 1 && units < 5) {
+    return forms[1];
+  }
+  if (units === 1) {
+    return forms[0];
+  }
+  return forms[2];
+}
+
 // Одна строка показывает состояние одной темы у всего класса.
 function createTopicRow(topic) {
   const row = document.createElement("article");
@@ -141,8 +172,11 @@ function createTopicRow(topic) {
   progressBox.append(percent);
 
   details.className = "class-topic-detail";
-  details.textContent = topic.students_struggling + " учеников застряли · в среднем " +
-    topic.avg_hints + " подсказок";
+  details.textContent = topic.students_struggling + " " +
+    plural(topic.students_struggling, ["ученик", "ученика", "учеников"]) + " " +
+    plural(topic.students_struggling, ["застрял", "застряли", "застряли"]) +
+    " · в среднем " + topic.avg_hints + " " +
+    plural(topic.avg_hints, ["подсказка", "подсказки", "подсказок"]);
 
   row.append(title);
   if (topic.source_ref) row.append(source);
