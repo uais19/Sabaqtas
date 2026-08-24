@@ -67,7 +67,9 @@ function createStairRow(topic, isRoot) {
 
   const title = document.createElement("span");
   title.className = "stair-topic";
-  title.textContent = topic.title;
+  // Название темы берём по её идентификатору: так оно приходит на том языке,
+  // который выбран, а не на том, как написано в mock.js.
+  title.textContent = t("topic." + topic.topic_id, topic.title);
 
   const grade = document.createElement("span");
   grade.className = "stair-grade";

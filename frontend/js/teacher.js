@@ -94,7 +94,7 @@ function createStudentRow(student) {
   nameCell.append(name);
 
   topic.className = "gap-title";
-  topic.textContent = student.root_topic.title;
+  topic.textContent = t("topic." + student.root_topic.topic_id, student.root_topic.title);
   source.className = "gap-source";
   source.textContent = paragraphOnly(student.root_topic.source_ref);
   topicCell.append(topic, source);
@@ -153,7 +153,8 @@ function createTopicRow(topic) {
 
   row.className = "class-topic";
   title.className = "class-topic-title";
-  title.textContent = topic.title;
+  // Добавленная руками тема идентификатора не имеет — тогда остаётся как есть
+  title.textContent = topic.topic_id ? t("topic." + topic.topic_id, topic.title) : topic.title;
   source.className = "class-topic-source";
   // Источник у темы может быть пустым: у добавленных вручную тем его нет.
   source.textContent = topic.source_ref ? paragraphOnly(topic.source_ref) : "";

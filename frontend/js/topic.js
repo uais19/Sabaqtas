@@ -108,7 +108,8 @@ function paragraphOnly(sourceRef) {
 }
 
 function renderHeader() {
-  document.getElementById("topic-title").textContent = TOPIC.title;
+  // TOPIC_ID известен выше — по нему и берём название на нужном языке
+  document.getElementById("topic-title").textContent = t("topic." + TOPIC_ID, TOPIC.title);
   document.getElementById("topic-grade").textContent =
     tFormat("common.gradeLabel", "{n} класс", { n: TOPIC.grade });
   document.getElementById("topic-source").textContent = paragraphOnly(MATERIAL.source_ref);

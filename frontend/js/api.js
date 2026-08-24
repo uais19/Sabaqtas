@@ -46,6 +46,9 @@ function mockQuestion(level, index) {
     id: question.id,
     text: question.text,
     options: question.options,
+    // topic_id нужен экрану, чтобы взять название темы на нужном языке:
+    // перевод ищется по идентификатору, а не по русскому тексту.
+    topic_id: level.topic_id,
     topic_title: level.topic_title,
     grade: level.grade
   };

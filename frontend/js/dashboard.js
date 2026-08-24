@@ -251,7 +251,8 @@ function createPlanRow(row) {
 
   const title = document.createElement("p");
   title.className = "plan-title";
-  title.textContent = row.title;
+  // Название темы — по идентификатору, чтобы приходило на выбранном языке
+  title.textContent = t("topic." + row.topic_id, row.title);
   if (row.grade) {
     title.append(" ", createGradeBadge(row.grade));
   }
@@ -373,7 +374,7 @@ function renderWeakSpots() {
 
     const title = document.createElement("p");
     title.className = "weak-title";
-    title.textContent = topic.title;
+    title.textContent = t("topic." + topic.topic_id, topic.title);
     title.append(" ", createGradeBadge(topic.grade));
     item.append(title);
 
