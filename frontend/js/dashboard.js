@@ -252,7 +252,7 @@ function createPlanRow(row) {
   const title = document.createElement("p");
   title.className = "plan-title";
   // Название темы — по идентификатору, чтобы приходило на выбранном языке
-  title.textContent = t("topic." + row.topic_id, row.title);
+  title.textContent = t("topic." + row.topicId, row.title);
   if (row.grade) {
     title.append(" ", createGradeBadge(row.grade));
   }
@@ -269,7 +269,10 @@ function createPlanRow(row) {
 
   const reason = document.createElement("p");
   reason.className = "plan-reason";
-  reason.textContent = row.reason;
+  // Пояснение «почему эта тема» — наш собственный текст, не цитата
+  // из учебника, поэтому переводим. У закрытых тем в reason лежит
+  // уже готовая фраза с датой — там ключа нет, и вернётся она сама.
+  reason.textContent = t("reason." + row.topicId, row.reason);
   body.append(reason);
 
   // Переход к теме. Каждая строка ведёт на свою тему: topic.html?topic=<id>.
