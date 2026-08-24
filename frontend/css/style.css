@@ -2015,6 +2015,22 @@ h1 {
   margin-top: 8px;
 }
 
+/* Свёрнутая подсказка. Правило нужно явно: у .feedback-text задан свой
+   display через margin/размер, и без этого атрибут hidden может не сработать. */
+.feedback-text[hidden] {
+  display: none;
+}
+
+/* Кнопка «Скрыть подсказку». Это служебное действие рядом с текстом,
+   а не действие на экране — поэтому мельче обычной ссылки и без отступа
+   слева, чтобы вставать ровно под первой строкой подсказки. */
+.hint-toggle {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 4px 0;
+  font-size: 15px;
+}
+
 .feedback-note {
   font-size: 15px;
   color: var(--muted);

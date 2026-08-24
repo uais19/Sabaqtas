@@ -393,6 +393,44 @@ function mentorQuestion(task) {
   return task.mentor_question || task.text;
 }
 
+// Кнопка «Скрыть подсказку».
+//
+// Подсказка помогает не всем одинаково. Кто-то хочет додуматься сам и просит
+// её убрать с глаз; кто-то, наоборот, читает по два раза. Поэтому не решаем
+// за ученика: подсказка видна сразу, но её можно свернуть одним нажатием.
+//
+// Выбор живёт до конца задания. Следующее задание снова покажет подсказку —
+// решение «не хочу подсказок» принимается заново, когда задача другая.
+function addHintToggle(feedback) {
+  const hint = feedback.querySelector(".feedback-text");
+  if (!hint) {
+    return;
+  }
+
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "link-button hint-toggle";
+  toggle.textContent = t("topicScreen.hideHint", "Скрыть подсказку");
+  // Экранному диктору нужно знать, свёрнут блок или развёрнут.
+  toggle.setAttribute("aria-expanded", "true");
+
+  toggle.addEventListener("click", function () {
+    const hidden = hint.hasAttribute("hidden");
+    if (hidden) {
+      hint.removeAttribute("hidden");
+      toggle.textContent = t("topicScreen.hideHint", "Скрыть подсказку");
+      toggle.setAttribute("aria-expanded", "true");
+    } else {
+      hint.setAttribute("hidden", "");
+      toggle.textContent = t("topicScreen.showHint", "Показать подсказку");
+      toggle.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  // Ставим сразу под подсказкой: кнопка относится к ней, а не к разбору целиком.
+  hint.parentNode.insertBefore(toggle, hint.nextSibling);
+}
+
 // Неверный ответ: подсказка и предложение разобрать задачу с наставником.
 // Верного варианта здесь нет и быть не может.
 function showWrong(task) {
@@ -402,6 +440,8 @@ function showWrong(task) {
 
   fillFeedback(feedback, t("topicScreen.wrong", "Пока не то. Попробуй ещё раз"),
     t("task." + task.id + ".hint", task.hint));
+
+  addHintToggle(feedback);
 
   const actions = document.createElement("div");
   actions.className = "feedback-actions";
