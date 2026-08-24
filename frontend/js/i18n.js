@@ -201,7 +201,7 @@ const TRANSLATIONS = {
     "landing.navTeachers": "Мұғалімдерге",
     "landing.navChat": "ЖИ-мен чат",
     "landing.navPlan": "Жоспарым",
-    "landing.teacherLogin": "Мұғалімге кіру",
+    "landing.teacherLogin": "Мұғалім панелі",
     // В казахском тема не встаёт после предлога, как в русском «застрял в …»,
     // поэтому фразу строим через тире, а сменное слово оставляем в конце.
     "landing.heroTitle": "Қай жерде тұрып қалғаныңды табамыз — ",
