@@ -254,7 +254,7 @@ function renderTask() {
   answerButtons = [];
 
   renderProgress(task);
-  document.getElementById("task-text").textContent = task.text;
+  document.getElementById("task-text").textContent = tTask(task.text);
 
   const answers = document.getElementById("task-answers");
   answers.textContent = "";
@@ -263,7 +263,7 @@ function renderTask() {
     const button = document.createElement("button");
     button.className = "answer";
     button.type = "button";
-    button.textContent = option;
+    button.textContent = tTask(option);
     button.addEventListener("click", function () {
       checkAnswer(index, button);
     });
@@ -406,7 +406,7 @@ function revealAnswer() {
   feedback.className = "task-feedback";
 
   fillFeedback(feedback, tFormat("topicScreen.correctAnswer", "Верный ответ: {answer}",
-    { answer: task.options[task.correct_index] }),
+    { answer: tTask(task.options[task.correct_index]) }),
     task.explain);
 
   const note = document.createElement("p");
