@@ -83,11 +83,11 @@ const TRANSLATIONS = {
     "diag.title": "Диагностика — Sabaqtas",
     "diag.heading": "Диагностика",
     "diag.subtitle": "Шыныңды айт. Білмесең — солай деп жаз, бұл олқылықты тезірек табуға көмектеседі.",
-    "diag.chainTitle": "Не тексерілді",
+    "diag.chainTitle": "Тексерілгендер",
     "diag.dontKnow": "Білмеймін",
     "diag.grade": "сынып",
-    "diag.statusGap": "осында олқылық",
-    "diag.statusMore": "тағы сұрақ",
+    "diag.statusGap": "осында олқылық бар",
+    "diag.statusMore": "сұрақ қалды",
     "diag.statusOk": "✓ түсінікті",
     "diag.statusFail": "✕ шыққан жоқ",
     "diag.profileLine": "жоғарыдан бастап, олқылықты тапқанша төмен түсеміз",
@@ -127,7 +127,48 @@ const TRANSLATIONS = {
     "diag.resultOne": "«{root}» тақырыбынан бастаймыз — {grade} сынып. Оны жаппайынша, қалғанын шешудің мәні жоқ.",
     "diag.resultTwo": "«{first}» тақырыбынан емес, «{root}» тақырыбынан бастаймыз — {grade} сынып. Оны жаппайынша, қалғанын шешудің мәні жоқ.",
     "diag.levelNote": " Дайындығыңды «{level}» деп бағаладың, ал олқылық {grade} сыныпта шықты.",
-    "diag.profileLineFull": "{name}, жоғарыдан бастап, олқылықты тапқанша төмен түсеміз"
+    "diag.profileLineFull": "{name}, жоғарыдан бастап, олқылықты тапқанша төмен түсеміз",
+    // --- Личный кабинет ---
+    "dash.title": "Менің жоспарым — Sabaqtas",
+    "dash.header": "Менің жоспарым",
+    "dash.headerNamed": "Менің жоспарым — {name}",
+    "dash.rootGapLabel": "Сенің түбірлік олқылығың:",
+    "dash.rootGapNote": "Бұл тақырыпты жаппайынша, қалғанын шешудің мәні жоқ.",
+    "dash.deadlineHeading": "Жақын мақсат",
+    "dash.planHeading": "Оқу жоспары",
+    "dash.planSub": "Төменнен жоғары: түбірлік олқылықтан өз сыныбыңның тақырыбына дейін.",
+    "dash.progressHeading": "Ілгерілеу",
+    "dash.points": "Ұпай",
+    "dash.streak": "Күндер қатары",
+    "dash.closedGaps": "Жабылған олқылық",
+    "dash.weakHeading": "Әлсіз тұстар",
+    "dash.weakSub": "Диагностика берік емес деп белгілегені.",
+    "dash.goal": "Мақсат: {goal}",
+    "dash.level": "Бастапқы деңгей: {level}",
+    "dash.deadlineLeft": "{goal}: {days} күн қалды",
+    "dash.deadlineDate": "Күні: {date}",
+    "dash.closedOn": "{date} жабылды. Бұл тақырып енді кедергі емес.",
+    "dash.closedNoDate": "Жабылды. Бұл тақырып енді кедергі емес.",
+    "dash.study": "Айналысу",
+    "dash.view": "Қарау",
+    "dash.mastery": "Меңгерілді: {percent}%",
+    "dash.error": "Деректерді жүктеу мүмкін болмады. Бетті жаңартыңыз.",
+    "dash.goalFallback": "Мақсат",
+    // В казахском у слова «күн» нет форм для 1, 2-4 и 5+ — оно одно на все числа
+    "dash.daysWord": "күн",
+
+    // --- Достижения ---
+    "ach.firstGap": "Алғашқы жабылған олқылық",
+    "ach.streak3": "3 күн қатарынан",
+    "ach.noHint": "Көмексіз жеттің",
+    "ach.firstDiag": "Алғашқы диагностика",
+
+    // --- Месяцы для длинных дат («15 маусым 2027») ---
+    "month.1": "қаңтар", "month.2": "ақпан", "month.3": "наурыз",
+    "month.4": "сәуір", "month.5": "мамыр", "month.6": "маусым",
+    "month.7": "шілде", "month.8": "тамыз", "month.9": "қыркүйек",
+    "month.10": "қазан", "month.11": "қараша", "month.12": "желтоқсан"
+
   }
 };
 

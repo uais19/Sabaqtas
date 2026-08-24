@@ -37,13 +37,14 @@ function renderProfileLines() {
   }
 
   if (profile.name) {
-    document.getElementById("header-title").textContent = "Мой план — " + profile.name;
+    document.getElementById("header-title").textContent =
+      tFormat("dash.headerNamed", "Мой план — {name}", { name: profile.name });
   }
 
   const label = goalLabel(profile.goal);
   if (label) {
     const goalLine = document.getElementById("goal-line");
-    goalLine.textContent = "Цель: " + label;
+    goalLine.textContent = tFormat("dash.goal", "Цель: {goal}", { goal: label });
     goalLine.classList.remove("is-hidden");
   }
 
@@ -62,7 +63,7 @@ function renderProfileLines() {
   const level = levelLabel(profile.level);
   if (level) {
     const levelLine = document.getElementById("level-line");
-    levelLine.textContent = "Уровень на старте: " + level;
+    levelLine.textContent = tFormat("dash.level", "Уровень на старте: {level}", { level: level });
     levelLine.classList.remove("is-hidden");
   }
 
@@ -72,11 +73,12 @@ function renderProfileLines() {
   const days = daysUntil(profile.deadline);
   if (days !== null) {
     // Если цель не указана или код неизвестен, пишем просто «Цель».
-    const goalName = goalLabel(profile.goal) || "Цель";
+    const goalName = goalLabel(profile.goal) || t("dash.goalFallback", "Цель");
     document.getElementById("deadline-line").textContent =
-      goalName + ": осталось " + days + " " + daysWord(days);
+      tFormat("dash.deadlineLeft", "{goal}: осталось {days} {word}",
+        { goal: goalName, days: days, word: daysWord(days) });
     document.getElementById("deadline-note").textContent =
-      "Дата: " + formatLongDate(profile.deadline);
+      tFormat("dash.deadlineDate", "Дата: {date}", { date: formatLongDate(profile.deadline) });
     document.getElementById("deadline-section").classList.remove("is-hidden");
   }
 }
@@ -105,9 +107,10 @@ function formatDate(isoDate) {
 // даты — выдумывать её нельзя, а «Закрыто .» выглядело бы поломкой.
 function closedReason(closedDate) {
   if (typeof closedDate !== "string" || closedDate === "") {
-    return "Закрыто. Эта тема больше не мешает.";
+    return t("dash.closedNoDate", "Закрыто. Эта тема больше не мешает.");
   }
-  return "Закрыто " + formatDate(closedDate) + ". Эта тема больше не мешает.";
+  return tFormat("dash.closedOn", "Закрыто {date}. Эта тема больше не мешает.",
+    { date: formatDate(closedDate) });
 }
 
 // Месяцы в родительном падеже — для даты вида «15 июня 2027».
@@ -122,7 +125,8 @@ const MONTHS_GENITIVE = [
 function formatLongDate(isoDate) {
   const parts = isoDate.split("-");
   const day = Number(parts[2]);
-  const month = MONTHS_GENITIVE[Number(parts[1]) - 1];
+  const monthNumber = Number(parts[1]);
+  const month = t("month." + monthNumber, MONTHS_GENITIVE[monthNumber - 1]);
   return day + " " + month + " " + parts[0];
 }
 
@@ -131,6 +135,11 @@ function daysWord(count) {
   const lastTwo = count % 100;
   const last = count % 10;
   // 11–14 — всегда «дней», хотя оканчиваются на 1–4.
+  // В казахском у слова «күн» одна форма на все числа, поэтому если язык
+  // казахский — возвращаем её сразу, не разбирая окончания.
+  const kazakh = t("dash.daysWord", "");
+  if (kazakh) return kazakh;
+
   if (lastTwo >= 11 && lastTwo <= 14) return "дней";
   if (last === 1) return "день";
   if (last >= 2 && last <= 4) return "дня";
@@ -141,7 +150,7 @@ function daysWord(count) {
 function createGradeBadge(grade) {
   const badge = document.createElement("span");
   badge.className = "grade-badge";
-  badge.textContent = grade + " класс";
+  badge.textContent = grade + " " + t("diag.grade", "класс");
   return badge;
 }
 
@@ -150,7 +159,7 @@ function createGradeBadge(grade) {
 function renderRootGap() {
   const root = MOCK.progress.root_topic;
   document.getElementById("root-title").textContent =
-    root.title + " · " + root.grade + " класс";
+    t("topic." + root.id, root.title) + " · " + root.grade + " " + t("diag.grade", "класс");
   document.getElementById("root-source").textContent = paragraphOnly(root.source_ref);
 }
 
@@ -271,13 +280,13 @@ function createPlanRow(row) {
     const link = document.createElement("a");
     link.className = "button button-primary plan-button";
     link.href = "topic.html?topic=" + row.topicId;
-    link.textContent = "Заниматься";
+    link.textContent = t("dash.study", "Заниматься");
     body.append(link);
   } else if (row.state === "ahead" && hasTasks) {
     const link = document.createElement("a");
     link.className = "link-button";
     link.href = "topic.html?topic=" + row.topicId;
-    link.textContent = "Посмотреть";
+    link.textContent = t("dash.view", "Посмотреть");
     body.append(link);
   }
 
@@ -310,20 +319,20 @@ function renderProgress(stored) {
   // каждый значок либо есть в данных, либо считается по ним.
   const badges = [
     {
-      title: "Первый закрытый пробел",
+      title: t("ach.firstGap", "Первый закрытый пробел"),
       // Есть хотя бы один закрытый пробел: в данных или закрытый учеником.
       earned: progress.closed_gaps.length > 0 || stored.closed.length > 0
     },
     {
-      title: "Серия 3 дня",
+      title: t("ach.streak3", "Серия 3 дня"),
       earned: progress.streak_days >= 3
     },
     {
-      title: "Дошёл без подсказки",
+      title: t("ach.noHint", "Дошёл без подсказки"),
       earned: earnedIds.indexOf("ach_no_hints") !== -1
     },
     {
-      title: "Первая диагностика",
+      title: t("ach.firstDiag", "Первая диагностика"),
       earned: earnedIds.indexOf("ach_first_diag") !== -1
     }
   ];
@@ -377,7 +386,7 @@ function renderWeakSpots() {
 
     const mastery = document.createElement("p");
     mastery.className = "weak-mastery";
-    mastery.textContent = "Освоено " + topic.mastery + "%";
+    mastery.textContent = tFormat("dash.mastery", "Освоено {percent}%", { percent: topic.mastery });
     item.append(mastery);
 
     list.append(item);
@@ -390,7 +399,7 @@ function renderWeakSpots() {
 // а до них добраться нужно раньше, чем ими воспользуются.
 if (typeof MOCK === "undefined") {
   document.querySelector(".dash-page").innerHTML =
-    "<p class=\"dash-error\">Не удалось загрузить данные. Обновите страницу.</p>";
+    "<p class=\"dash-error\">" + t("dash.error", "Не удалось загрузить данные. Обновите страницу.") + "</p>";
 } else {
   renderDashboard();
 }
