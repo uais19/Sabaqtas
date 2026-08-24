@@ -348,7 +348,10 @@ function showCorrect(task) {
   feedback.textContent = "";
   feedback.className = "task-feedback is-ok";
 
-  fillFeedback(feedback, t("topicScreen.correct", "Верно"), task.explain);
+  // Разбор ищем по идентификатору задания. Перевода может не быть —
+  // тогда t() вернёт русский текст, и разбор всё равно будет виден.
+  fillFeedback(feedback, t("topicScreen.correct", "Верно"),
+    t("task." + task.id + ".explain", task.explain));
   feedback.append(createSourceBadge());
 
   const actions = document.createElement("div");
@@ -364,7 +367,8 @@ function showWrong(task) {
   feedback.textContent = "";
   feedback.className = "task-feedback is-bad";
 
-  fillFeedback(feedback, t("topicScreen.wrong", "Пока не то. Попробуй ещё раз"), task.hint);
+  fillFeedback(feedback, t("topicScreen.wrong", "Пока не то. Попробуй ещё раз"),
+    t("task." + task.id + ".hint", task.hint));
 
   const actions = document.createElement("div");
   actions.className = "feedback-actions";
@@ -407,7 +411,7 @@ function revealAnswer() {
 
   fillFeedback(feedback, tFormat("topicScreen.correctAnswer", "Верный ответ: {answer}",
     { answer: tTask(task.options[task.correct_index]) }),
-    task.explain);
+    t("task." + task.id + ".explain", task.explain));
 
   const note = document.createElement("p");
   note.className = "feedback-note";
