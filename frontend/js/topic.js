@@ -109,7 +109,8 @@ function paragraphOnly(sourceRef) {
 
 function renderHeader() {
   document.getElementById("topic-title").textContent = TOPIC.title;
-  document.getElementById("topic-grade").textContent = TOPIC.grade + " класс";
+  document.getElementById("topic-grade").textContent =
+    TOPIC.grade + " " + t("diag.grade", "класс");
   document.getElementById("topic-source").textContent = paragraphOnly(MATERIAL.source_ref);
 }
 
@@ -117,7 +118,7 @@ function renderMaterial() {
   document.getElementById("material-text").textContent = MATERIAL.text;
   // Книга и параграф — без страницы, как и везде на этих экранах.
   document.getElementById("material-source").textContent =
-    "Источник: " + paragraphOnly(MATERIAL.source_ref);
+    t("topicScreen.source", "Источник: ") + paragraphOnly(MATERIAL.source_ref);
 
   addMaterialSpeakButton();
 }
@@ -157,7 +158,7 @@ function createSourceBadge() {
 
   const badge = document.createElement("span");
   badge.className = "source-badge";
-  badge.textContent = "Источник: " + paragraphOnly(MATERIAL.source_ref);
+  badge.textContent = t("topicScreen.source", "Источник: ") + paragraphOnly(MATERIAL.source_ref);
 
   box.append(badge);
   return box;
@@ -194,9 +195,9 @@ function pickNextTask() {
 
 // Сложность числом -> словом. Неизвестное число — пустая строка.
 function difficultyLabel(difficulty) {
-  if (difficulty === 1) return "простой";
-  if (difficulty === 2) return "обычный";
-  if (difficulty === 3) return "сложный";
+  if (difficulty === 1) return t("topicScreen.diffEasy", "простой");
+  if (difficulty === 2) return t("topicScreen.diffNormal", "обычный");
+  if (difficulty === 3) return t("topicScreen.diffHard", "сложный");
   return "";
 }
 
@@ -223,8 +224,9 @@ function adjustTarget(solvedFirstTry) {
 // На первом задании подстройки ещё не было, цель не менялась — хвоста нет.
 function renderProgress(task) {
   const progress = document.getElementById("task-progress");
-  progress.textContent = "Задание " + (taskIndex + 1) + " из " + SESSION_LENGTH +
-    " · " + difficultyLabel(task.difficulty) + " уровень";
+  progress.textContent = tFormat("topicScreen.taskProgress",
+    "Задание {index} из {total} · {level} уровень",
+    { index: taskIndex + 1, total: SESSION_LENGTH, level: difficultyLabel(task.difficulty) });
 
   if (taskIndex === 0) {
     return;
@@ -237,9 +239,9 @@ function renderProgress(task) {
   const tail = document.createElement("span");
   tail.className = "topic-source";
   if (target > previousTarget) {
-    tail.textContent = " — стало сложнее";
+    tail.textContent = t("topicScreen.harder", " — стало сложнее");
   } else {
-    tail.textContent = " — стало проще";
+    tail.textContent = t("topicScreen.easier", " — стало проще");
   }
   progress.append(tail);
 }
@@ -331,9 +333,9 @@ function createNextButton() {
   button.className = "button button-primary";
   button.type = "button";
   if (taskIndex === SESSION_LENGTH - 1) {
-    button.textContent = "Посмотреть итог";
+    button.textContent = t("topicScreen.seeSummary", "Посмотреть итог");
   } else {
-    button.textContent = "Следующее задание";
+    button.textContent = t("topicScreen.nextTask", "Следующее задание");
   }
   button.addEventListener("click", nextTask);
   return button;
@@ -345,7 +347,7 @@ function showCorrect(task) {
   feedback.textContent = "";
   feedback.className = "task-feedback is-ok";
 
-  fillFeedback(feedback, "Верно", task.explain);
+  fillFeedback(feedback, t("topicScreen.correct", "Верно"), task.explain);
   feedback.append(createSourceBadge());
 
   const actions = document.createElement("div");
@@ -361,7 +363,7 @@ function showWrong(task) {
   feedback.textContent = "";
   feedback.className = "task-feedback is-bad";
 
-  fillFeedback(feedback, "Пока не то. Попробуй ещё раз", task.hint);
+  fillFeedback(feedback, t("topicScreen.wrong", "Пока не то. Попробуй ещё раз"), task.hint);
 
   const actions = document.createElement("div");
   actions.className = "feedback-actions";
@@ -371,7 +373,7 @@ function showWrong(task) {
   const mentorLink = document.createElement("a");
   mentorLink.className = "button button-primary";
   mentorLink.href = "chat.html?mode=mentor";
-  mentorLink.textContent = "Помоги решить самому";
+  mentorLink.textContent = t("topicScreen.mentor", "Помоги решить самому");
   actions.append(mentorLink);
 
   // Показать ответ — только после трёх неудачных попыток и только тихой
@@ -380,7 +382,7 @@ function showWrong(task) {
     const revealLink = document.createElement("button");
     revealLink.className = "link-button";
     revealLink.type = "button";
-    revealLink.textContent = "Показать ответ";
+    revealLink.textContent = t("topicScreen.reveal", "Показать ответ");
     revealLink.addEventListener("click", revealAnswer);
     actions.append(revealLink);
   }
@@ -402,12 +404,14 @@ function revealAnswer() {
   feedback.textContent = "";
   feedback.className = "task-feedback";
 
-  fillFeedback(feedback, "Верный ответ: " + task.options[task.correct_index],
+  fillFeedback(feedback, tFormat("topicScreen.correctAnswer", "Верный ответ: {answer}",
+    { answer: task.options[task.correct_index] }),
     task.explain);
 
   const note = document.createElement("p");
   note.className = "feedback-note";
-  note.textContent = "Очки за это задание не начислены — в следующий раз дойди сам.";
+  note.textContent = t("topicScreen.noPoints",
+    "Очки за это задание не начислены — в следующий раз дойди сам.");
   feedback.append(note);
 
   feedback.append(createSourceBadge());
@@ -448,9 +452,11 @@ function showSummary() {
   // Очки всегда кратны пяти, поэтому слово всегда «очков» —
   // разбирать окончания не нужно.
   document.getElementById("summary-text").textContent =
-    "Задания закончились. Ты набрал " + points + " очков.";
+    tFormat("topicScreen.summary", "Задания закончились. Ты набрал {points} очков.",
+      { points: points });
   document.getElementById("summary-detail").textContent =
-    "С первой попытки: " + firstTryCount + " из " + SESSION_LENGTH;
+    tFormat("topicScreen.firstTry", "С первой попытки: {count} из {total}",
+      { count: firstTryCount, total: SESSION_LENGTH });
 
   // Записываем сессию в общий прогресс (readProgress / saveProgress живут
   // в profile.js): очки прибавляем к накопленным, тему отмечаем закрытой.
@@ -476,7 +482,8 @@ function showSummary() {
 // а до них добраться нужно раньше, чем ими воспользуются.
 if (typeof MOCK === "undefined") {
   document.querySelector(".topic-page").innerHTML =
-    "<p class=\"dash-error\">Не удалось загрузить тему. Обновите страницу.</p>";
+    "<p class=\"dash-error\">" + t("topicScreen.error",
+      "Не удалось загрузить тему. Обновите страницу.") + "</p>";
 } else {
   startTopic();
 }
