@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sabaqtas — поймём, где ты застрял</title>
+  <title data-i18n="landing.title">Sabaqtas — поймём, где ты застрял</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <!-- Крошечный скрипт до стилей: помечает страницу как «скрипты работают».
        Только после этого CSS прячет элементы для появления при прокрутке.
@@ -43,15 +43,15 @@
       <!-- data-nav хранит id секции. По нему nav.js находит ссылку
            и подсвечивает её — сразу и здесь, и в мобильном меню. -->
       <nav class="header-nav">
-        <a class="nav-link" data-nav="problem" href="#problem">Проблема</a>
-        <a class="nav-link" data-nav="example" href="#example">Пример</a>
-        <a class="nav-link" data-nav="how" href="#how">Как это работает</a>
-        <a class="nav-link" data-nav="teachers" href="#teachers">Учителям</a>
-        <a class="nav-link" href="chat.html">Чат с ИИ</a>
-        <a class="nav-link" href="dashboard.html">Мой план</a>
+        <a class="nav-link" data-nav="problem" href="#problem" data-i18n="landing.navProblem">Проблема</a>
+        <a class="nav-link" data-nav="example" href="#example" data-i18n="landing.navExample">Пример</a>
+        <a class="nav-link" data-nav="how" href="#how" data-i18n="landing.navHow">Как это работает</a>
+        <a class="nav-link" data-nav="teachers" href="#teachers" data-i18n="landing.navTeachers">Учителям</a>
+        <a class="nav-link" href="chat.html" data-i18n="landing.navChat">Чат с ИИ</a>
+        <a class="nav-link" href="dashboard.html" data-i18n="landing.navPlan">Мой план</a>
       </nav>
 
-      <a class="header-link" href="teacher.html">Войти как учитель</a>
+      <a class="header-link" href="teacher.html" data-i18n="landing.teacherLogin">Войти как учитель</a>
 
       <!-- Переключатель «Рус / Қаз» стоит последним, у самого края:
            это настройка, а не пункт навигации. Пустой контейнер,
@@ -66,16 +66,16 @@
 
   <!-- Мобильное меню: выезжает слева -->
   <nav class="menu-panel" id="mobile-menu" aria-label="Мобильное меню">
-    <a class="menu-link" data-nav="problem" href="#problem">Проблема</a>
-    <a class="menu-link" data-nav="example" href="#example">Пример</a>
-    <a class="menu-link" data-nav="how" href="#how">Как это работает</a>
-    <a class="menu-link" data-nav="teachers" href="#teachers">Учителям</a>
-    <a class="menu-link" href="chat.html">Чат с ИИ</a>
-    <a class="menu-link" href="dashboard.html">Мой план</a>
+    <a class="menu-link" data-nav="problem" href="#problem" data-i18n="landing.navProblem">Проблема</a>
+    <a class="menu-link" data-nav="example" href="#example" data-i18n="landing.navExample">Пример</a>
+    <a class="menu-link" data-nav="how" href="#how" data-i18n="landing.navHow">Как это работает</a>
+    <a class="menu-link" data-nav="teachers" href="#teachers" data-i18n="landing.navTeachers">Учителям</a>
+    <a class="menu-link" href="chat.html" data-i18n="landing.navChat">Чат с ИИ</a>
+    <a class="menu-link" href="dashboard.html" data-i18n="landing.navPlan">Мой план</a>
 
     <hr class="menu-divider">
 
-    <a class="menu-link" href="teacher.html">Войти как учитель</a>
+    <a class="menu-link" href="teacher.html" data-i18n="landing.teacherLogin">Войти как учитель</a>
   </nav>
 
   <main>
@@ -83,34 +83,34 @@
     <!-- ГЛАВНЫЙ ЭКРАН -->
     <section class="hero bg-1">
       <div class="container hero-inner">
-        <h1>Поймём, где ты застрял в <span id="rotator">дробях</span></h1>
-        <p class="hero-subtitle">
+        <h1><span data-i18n="landing.heroTitle">Поймём, где ты застрял в </span><span id="rotator">дробях</span></h1>
+        <p class="hero-subtitle" data-i18n="landing.heroSubtitle">
           Задача не решается? Обычно дело в теме, которую проходили раньше.
           Sabaqtas найдёт её и поможет разобраться.
         </p>
-        <a class="button button-primary hero-button" href="login.html">Начать обучение</a>
+        <a class="button button-primary hero-button" href="login.html" data-i18n="landing.heroButton">Начать обучение</a>
       </div>
     </section>
 
     <!-- ПРОБЛЕМА -->
     <section class="section bg-2" id="problem">
       <div class="container">
-        <h2 class="section-title reveal">Проблема</h2>
+        <h2 class="section-title reveal" data-i18n="landing.problemTitle">Проблема</h2>
         <div class="cards cards-3">
 
           <article class="card reveal">
-            <h3 class="card-title">Не у всех есть репетитор</h3>
-            <p class="card-text">В селе трудно найти того, кто объяснит после уроков.</p>
+            <h3 class="card-title" data-i18n="landing.problem1">Не у всех есть репетитор</h3>
+            <p class="card-text" data-i18n="landing.problem1text">В селе трудно найти того, кто объяснит после уроков.</p>
           </article>
 
           <article class="card reveal">
-            <h3 class="card-title">Учитель один на всех</h3>
-            <p class="card-text">Учитель не может уделить внимание каждому ученику в классе.</p>
+            <h3 class="card-title" data-i18n="landing.problem2">Учитель один на всех</h3>
+            <p class="card-text" data-i18n="landing.problem2text">Учитель не может уделить внимание каждому ученику в классе.</p>
           </article>
 
           <article class="card reveal">
-            <h3 class="card-title">ИИ решает вместо ученика</h3>
-            <p class="card-text">Поэтому во многих школах его запрещают.</p>
+            <h3 class="card-title" data-i18n="landing.problem3">ИИ решает вместо ученика</h3>
+            <p class="card-text" data-i18n="landing.problem3text">Поэтому во многих школах его запрещают.</p>
           </article>
 
         </div>
@@ -120,13 +120,13 @@
     <!-- РЕШЕНИЕ -->
     <section class="section bg-3" id="solution">
       <div class="container">
-        <h2 class="section-title reveal">Решение</h2>
-        <p class="solution-text">
+        <h2 class="section-title reveal" data-i18n="landing.solutionTitle">Решение</h2>
+        <p class="solution-text" data-i18n="landing.solutionText">
           Sabaqtas находит тему, которую ученик не понял, и ведёт его к ответу
           подсказками. Всё объяснение берётся из школьного учебника.
         </p>
         <div class="solution-action">
-          <a class="button button-primary" href="chat.html">Спросить ИИ</a>
+          <a class="button button-primary" href="chat.html" data-i18n="landing.solutionButton">Спросить ИИ</a>
         </div>
       </div>
     </section>
@@ -136,8 +136,8 @@
          вниз до той темы, где на самом деле пробел. -->
     <section class="section spotlight" id="example">
       <div class="container">
-        <h2 class="section-title reveal">Пример</h2>
-        <p class="example-intro">
+        <h2 class="section-title reveal" data-i18n="landing.exampleTitle">Пример</h2>
+        <p class="example-intro" data-i18n="landing.exampleIntro">
           У ученика 8 класса не получаются квадратные уравнения.
           Вот что находит Sabaqtas:
         </p>
@@ -145,32 +145,32 @@
         <ol class="stairs">
 
           <li class="stair reveal">
-            <span class="stair-topic">Квадратные уравнения</span>
-            <span class="stair-grade">8 класс</span>
-            <span class="stair-status">✕ не получилось</span>
+            <span class="stair-topic" data-i18n="topic.t_8_kvadr">Квадратные уравнения</span>
+            <span class="stair-grade" data-i18n="common.grade8">8 класс</span>
+            <span class="stair-status" data-i18n="diag.statusFail">✕ не получилось</span>
           </li>
 
           <li class="stair reveal">
-            <span class="stair-topic">Формулы сокращённого умножения</span>
-            <span class="stair-grade">7 класс</span>
-            <span class="stair-status">✕ не получилось</span>
+            <span class="stair-topic" data-i18n="topic.t_7_fsu">Формулы сокращённого умножения</span>
+            <span class="stair-grade" data-i18n="common.grade7">7 класс</span>
+            <span class="stair-status" data-i18n="diag.statusFail">✕ не получилось</span>
           </li>
 
           <li class="stair reveal">
-            <span class="stair-topic">Сложение рациональных чисел с разными знаками</span>
-            <span class="stair-grade">6 класс</span>
-            <span class="stair-status">✕ не получилось</span>
+            <span class="stair-topic" data-i18n="topic.t_6_ratsion">Сложение рациональных чисел с разными знаками</span>
+            <span class="stair-grade" data-i18n="common.grade6">6 класс</span>
+            <span class="stair-status" data-i18n="diag.statusFail">✕ не получилось</span>
           </li>
 
           <li class="stair stair-gap reveal">
-            <span class="stair-topic">Сложение и вычитание обыкновенных дробей</span>
-            <span class="stair-grade">5 класс</span>
-            <span class="stair-status">← здесь пробел</span>
+            <span class="stair-topic" data-i18n="topic.t_5_drobi">Сложение и вычитание обыкновенных дробей</span>
+            <span class="stair-grade" data-i18n="common.grade5">5 класс</span>
+            <span class="stair-status" data-i18n="landing.gapHere">← здесь пробел</span>
           </li>
 
         </ol>
 
-        <p class="example-note">
+        <p class="example-note" data-i18n="landing.exampleNote">
           Начинаем не с квадратных уравнений, а с дробей за 5 класс.
         </p>
       </div>
@@ -179,27 +179,27 @@
     <!-- КАК ЭТО РАБОТАЕТ -->
     <section class="section bg-1" id="how">
       <div class="container">
-        <h2 class="section-title reveal">Как это работает</h2>
+        <h2 class="section-title reveal" data-i18n="landing.howTitle">Как это работает</h2>
         <ol class="steps">
 
           <li class="step reveal">
             <span class="step-number">1</span>
-            <p class="step-text">Отвечаешь на несколько вопросов</p>
+            <p class="step-text" data-i18n="landing.how1">Отвечаешь на несколько вопросов</p>
           </li>
 
           <li class="step reveal">
             <span class="step-number">2</span>
-            <p class="step-text">Находим тему, которую ты не понял — даже если её проходили давно</p>
+            <p class="step-text" data-i18n="landing.how2">Находим тему, которую ты не понял — даже если её проходили давно</p>
           </li>
 
           <li class="step reveal">
             <span class="step-number">3</span>
-            <p class="step-text">Составляем план и начинаем с неё</p>
+            <p class="step-text" data-i18n="landing.how3">Составляем план и начинаем с неё</p>
           </li>
 
           <li class="step reveal">
             <span class="step-number">4</span>
-            <p class="step-text">Помогаем решить самому, подсказками, без готового ответа</p>
+            <p class="step-text" data-i18n="landing.how4">Помогаем решить самому, подсказками, без готового ответа</p>
           </li>
 
         </ol>
@@ -209,28 +209,28 @@
     <!-- ЧЕМ МЫ ОТЛИЧАЕМСЯ -->
     <section class="section bg-2" id="different">
       <div class="container">
-        <h2 class="section-title reveal">Чем мы отличаемся</h2>
+        <h2 class="section-title reveal" data-i18n="landing.diffTitle">Чем мы отличаемся</h2>
         <div class="cards cards-3">
 
           <article class="card card-strong reveal">
-            <h3 class="card-title">Пробел из прошлых классов</h3>
-            <p class="card-text">
+            <h3 class="card-title" data-i18n="landing.diff1">Пробел из прошлых классов</h3>
+            <p class="card-text" data-i18n="landing.diff1text">
               Ты не решаешь задачу за 8 класс, потому что не понял тему за 5-й.
               Мы находим эту тему.
             </p>
           </article>
 
           <article class="card card-strong reveal">
-            <h3 class="card-title">Режим наставника</h3>
-            <p class="card-text">
+            <h3 class="card-title" data-i18n="landing.diff2">Режим наставника</h3>
+            <p class="card-text" data-i18n="landing.diff2text">
               ИИ не даёт готовый ответ. Он задаёт вопросы и помогает дойти
               до решения самому. Поэтому его можно разрешить в школе.
             </p>
           </article>
 
           <article class="card card-strong reveal">
-            <h3 class="card-title">Только из учебника</h3>
-            <p class="card-text">
+            <h3 class="card-title" data-i18n="landing.diff3">Только из учебника</h3>
+            <p class="card-text" data-i18n="landing.diff3text">
               Каждый ответ со ссылкой на параграф учебника.
               Чего нет в учебнике, ИИ не придумает.
               Отвечает на русском и на казахском.
@@ -244,11 +244,11 @@
     <!-- ДЛЯ УЧИТЕЛЕЙ -->
     <section class="section bg-3" id="teachers">
       <div class="container teachers">
-        <h2 class="section-title reveal">Учителям</h2>
-        <p class="teachers-text">
+        <h2 class="section-title reveal" data-i18n="landing.teachersTitle">Учителям</h2>
+        <p class="teachers-text" data-i18n="landing.teachersText">
           Видно, кто где застрял и кому нужна помощь. Проверять тетради не нужно.
         </p>
-        <a class="button button-primary" href="teacher.html">Панель учителя</a>
+        <a class="button button-primary" href="teacher.html" data-i18n="landing.teachersButton">Панель учителя</a>
       </div>
     </section>
 
@@ -257,7 +257,7 @@
   <!-- ПОДВАЛ -->
   <footer class="site-footer bg-4">
     <div class="container">
-      <p>Sabaqtas · Future Minds Hackathon 2026 · трек Social Impact</p>
+      <p data-i18n="landing.footer">Sabaqtas · Future Minds Hackathon 2026 · трек Social Impact</p>
     </div>
   </footer>
 
