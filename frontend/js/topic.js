@@ -122,6 +122,28 @@ function renderMaterial() {
     t("topicScreen.source", "Источник: ") + paragraphOnly(MATERIAL.source_ref);
 
   addMaterialSpeakButton();
+  addSourceLanguageNote();
+}
+
+// Подпись о языке правила — только на казахском интерфейсе.
+//
+// Правило и ссылка на параграф остаются русскими намеренно: это дословная
+// цитата из русского издания учебника. Перевести её значило бы выдать
+// пересказ за источник — а весь смысл экрана в том, что текст настоящий.
+// Но на казахском экране русский абзац без объяснения выглядит недоделкой,
+// поэтому честно подписываем, откуда он и что будет дальше.
+// В русском интерфейсе подписывать нечего: язык и так совпадает.
+function addSourceLanguageNote() {
+  if (uiLang() !== "kk") {
+    return;
+  }
+  const note = document.createElement("p");
+  note.className = "material-note";
+  note.textContent = t("topicScreen.sourceLangNote", "");
+  if (!note.textContent) {
+    return;
+  }
+  document.querySelector(".material-card").append(note);
 }
 
 // Кнопка «Прослушать» под правилом из учебника.

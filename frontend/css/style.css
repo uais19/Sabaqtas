@@ -2210,6 +2210,15 @@ h1 {
   max-width: 85%;
 }
 
+/* Подпись о языке правила: служебная строка, не должна спорить с самим
+   правилом — поэтому мельче и приглушённого цвета. */
+.material-note {
+  margin-top: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
 .speak-button {
   display: inline-flex;
   align-items: center;
