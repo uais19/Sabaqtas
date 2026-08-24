@@ -382,6 +382,17 @@ function showCorrect(task) {
   feedback.append(actions);
 }
 
+// С чем ученик придёт к наставнику.
+//
+// По умолчанию — сам текст задания: «Вычислите: 1/4 + 1/6». Наставник это
+// понимает, и ничего придумывать не надо.
+//
+// Но у задания может быть поле mentor_question — формулировка живее,
+// ближе к тому, как школьник спросил бы сам. Если она есть, берём её.
+function mentorQuestion(task) {
+  return task.mentor_question || task.text;
+}
+
 // Неверный ответ: подсказка и предложение разобрать задачу с наставником.
 // Верного варианта здесь нет и быть не может.
 function showWrong(task) {
@@ -396,10 +407,15 @@ function showWrong(task) {
   actions.className = "feedback-actions";
 
   // Главное действие после ошибки: не подсмотреть, а разобраться.
-  // Чат открывается сразу в режиме наставника.
+  // Чат открывается сразу в режиме наставника — и уже знает задачу.
+  //
+  // Раньше сюда уходил только режим, и ученик попадал в пустой чат:
+  // кнопка обещала помощь с этой задачей, а чат спрашивал, с какой.
+  // Теперь задачу передаём в адресе, чат подставляет её в поле ввода.
+  // Отправляет всё равно ученик — решение остаётся за ним.
   const mentorLink = document.createElement("a");
   mentorLink.className = "button button-primary";
-  mentorLink.href = "chat.html?mode=mentor";
+  mentorLink.href = "chat.html?mode=mentor&ask=" + encodeURIComponent(mentorQuestion(task));
   mentorLink.textContent = t("topicScreen.mentor", "Помоги решить самому");
   actions.append(mentorLink);
 
