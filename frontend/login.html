@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Вход — Sabaqtas</title>
+  <title data-i18n="login.title">Вход — Sabaqtas</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css">
   <!-- Экран работает целиком в браузере: ни mock.js, ни api.js не нужны.
@@ -27,8 +27,8 @@
 
   <main class="container page-narrow">
 
-    <h1 class="page-title">Перед началом</h1>
-    <p class="page-subtitle">
+    <h1 class="page-title" data-i18n="login.heading">Перед началом</h1>
+    <p class="page-subtitle" data-i18n="login.subtitle">
       Скажи, в каком ты классе и какова твоя цель обучения. Дальше диагностика
       найдёт тему, которую надо закрепить.
     </p>
@@ -37,73 +37,73 @@
     <form class="login-form" id="login-form">
 
       <div class="teacher-form-field">
-        <label for="login-name">Имя</label>
+        <label for="login-name" data-i18n="login.name">Имя</label>
         <input class="add-input" id="login-name" type="text" required>
       </div>
 
       <div class="teacher-form-field">
-        <label for="login-pass">Пароль</label>
+        <label for="login-pass" data-i18n="login.password">Пароль</label>
         <input class="add-input" id="login-pass" type="password" minlength="4" required>
       </div>
 
       <div class="teacher-form-field">
-        <label for="login-grade">Класс</label>
+        <label for="login-grade" data-i18n="login.grade">Класс</label>
         <!-- Цепочка тем идёт 8 -> 7 -> 6 -> 5, и диагностика всегда начинает
              с её верхней темы и спускается вниз, пока ученик не ответит
              верно. Поэтому она работает для любого класса из списка:
              старшекласснику проверяется база, на которой стоит его программа. -->
         <select class="add-input" id="login-grade">
-          <option value="7">7 класс</option>
-          <option value="8" selected>8 класс</option>
-          <option value="9">9 класс</option>
-          <option value="10">10 класс</option>
-          <option value="11">11 класс</option>
+          <option value="7" data-i18n="common.grade7">7 класс</option>
+          <option value="8" selected data-i18n="common.grade8">8 класс</option>
+          <option value="9" data-i18n="common.grade9">9 класс</option>
+          <option value="10" data-i18n="common.grade10">10 класс</option>
+          <option value="11" data-i18n="common.grade11">11 класс</option>
         </select>
       </div>
 
       <div class="teacher-form-field">
-        <label for="login-subject">Предмет</label>
+        <label for="login-subject" data-i18n="login.subject">Предмет</label>
         <!-- Физика и химия выключены: у диагностики пока есть данные только
              по математике. Включённая «Физика» показала бы математические
              вопросы под физической вывеской — заметная ложь на демо. -->
         <select class="add-input" id="login-subject">
-          <option value="Математика" selected>Математика</option>
-          <option value="Физика" disabled>Физика — скоро</option>
-          <option value="Химия" disabled>Химия — скоро</option>
+          <option value="Математика" selected data-i18n="subject.math">Математика</option>
+          <option value="Физика" disabled data-i18n="subject.physics">Физика — скоро</option>
+          <option value="Химия" disabled data-i18n="subject.chemistry">Химия — скоро</option>
         </select>
       </div>
 
       <div class="teacher-form-field">
-        <label for="login-level">Уровень подготовки</label>
+        <label for="login-level" data-i18n="login.level">Уровень подготовки</label>
         <!-- Самооценка ученика. В конце диагностики мы сравним её
              с тем, что нашлось на самом деле. -->
         <select class="add-input" id="login-level">
-          <option value="weak">Многое забыл</option>
-          <option value="medium" selected>Средний</option>
-          <option value="strong">Уверенно себя чувствую</option>
+          <option value="weak" data-i18n="level.weak">Многое забыл</option>
+          <option value="medium" selected data-i18n="level.medium">Средний</option>
+          <option value="strong" data-i18n="level.strong">Уверенно себя чувствую</option>
         </select>
       </div>
 
       <div class="teacher-form-field">
-        <label for="login-goal">Цель</label>
+        <label for="login-goal" data-i18n="login.goal">Цель</label>
         <select class="add-input" id="login-goal">
-          <option value="gaps" selected>Закрыть пробелы за прошлые годы</option>
-          <option value="current">Подтянуть текущую тему</option>
-          <option value="ent">Подготовка к ЕНТ</option>
-          <option value="olympiad">Подготовка к олимпиаде</option>
+          <option value="gaps" selected data-i18n="goal.gaps">Закрыть пробелы за прошлые годы</option>
+          <option value="current" data-i18n="goal.current">Подтянуть текущую тему</option>
+          <option value="ent" data-i18n="goal.ent">Подготовка к ЕНТ</option>
+          <option value="olympiad" data-i18n="goal.olympiad">Подготовка к олимпиаде</option>
         </select>
       </div>
 
       <div class="teacher-form-field">
-        <label for="login-deadline">Дата экзамена или зачёта</label>
+        <label for="login-deadline" data-i18n="login.deadline">Дата экзамена или зачёта</label>
         <!-- Дату спрашиваем у ученика, а не зашиваем сами: реальные даты
              экзаменов мы проверить не можем. Поле необязательное, required
              не ставим: у того, кто просто закрывает пробелы, экзамена нет. -->
         <input class="add-input" id="login-deadline" type="date">
-        <p class="profile-note">Необязательно. Если дата есть, в кабинете появится обратный отсчёт до неё.</p>
+        <p class="profile-note" data-i18n="login.deadlineNote">Необязательно. Если дата есть, в кабинете появится обратный отсчёт до неё.</p>
       </div>
 
-      <button class="button button-primary" type="submit">Начать</button>
+      <button class="button button-primary" type="submit" data-i18n="login.submit">Начать</button>
 
     </form>
 
@@ -113,11 +113,11 @@
     <!-- ===== ДЕМО-ВХОД =====
          Для жюри: два готовых аккаунта, чтобы посмотреть продукт
          без заполнения анкеты. -->
-    <section class="demo-entry" aria-label="Демо-вход">
-      <p class="demo-entry-note">Или открой готовый аккаунт и просто посмотри продукт:</p>
+    <section class="demo-entry" aria-label="Демо-вход" data-i18n-label="login.demoLabel">
+      <p class="demo-entry-note" data-i18n="login.demoNote">Или открой готовый аккаунт и просто посмотри продукт:</p>
       <div class="demo-entry-buttons">
-        <button class="button button-secondary" type="button" id="demo-student">Посмотреть как ученик</button>
-        <button class="button button-secondary" type="button" id="demo-teacher">Посмотреть как учитель</button>
+        <button class="button button-secondary" type="button" id="demo-student" data-i18n="login.demoStudent">Посмотреть как ученик</button>
+        <button class="button button-secondary" type="button" id="demo-teacher" data-i18n="login.demoTeacher">Посмотреть как учитель</button>
       </div>
     </section>
 

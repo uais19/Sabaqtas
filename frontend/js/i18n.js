@@ -29,7 +29,48 @@ const TRANSLATIONS = {
     "common.toPlan": "Жоспарға",
     "common.lang.ru": "Рус",
     "common.lang.kk": "Қаз",
-    "common.langLabel": "Интерфейс тілі"
+    "common.langLabel": "Интерфейс тілі",
+    "common.grade5": "5 сынып",
+    "common.grade6": "6 сынып",
+    "common.grade7": "7 сынып",
+    "common.grade8": "8 сынып",
+    "common.grade9": "9 сынып",
+    "common.grade10": "10 сынып",
+    "common.grade11": "11 сынып",
+
+    // --- Предметы и уровни (общие для анкеты и других экранов) ---
+    "subject.math": "Математика",
+    "subject.physics": "Физика — жақында",
+    "subject.chemistry": "Химия — жақында",
+    "level.weak": "Көбін ұмыттым",
+    "level.medium": "Орташа",
+    "level.strong": "Өзіме сенімдімін",
+    // ҰБТ — Ұлттық бірыңғай тестілеу, казахское название ЕНТ
+    "goal.gaps": "Өткен жылдардағы олқылықтарды жабу",
+    "goal.current": "Ағымдағы тақырыпты пысықтау",
+    "goal.ent": "ҰБТ-ға дайындық",
+    "goal.olympiad": "Олимпиадаға дайындық",
+
+    // --- Экран входа ---
+    "login.title": "Кіру — Sabaqtas",
+    "login.heading": "Бастамас бұрын",
+    "login.subtitle": "Қай сыныпта оқитыныңды және оқу мақсатыңды айт. Одан кейін диагностика бекітуді қажет ететін тақырыпты табады.",
+    "login.name": "Аты",
+    "login.password": "Құпия сөз",
+    "login.grade": "Сынып",
+    "login.subject": "Пән",
+    "login.level": "Дайындық деңгейі",
+    "login.goal": "Мақсат",
+    "login.deadline": "Емтихан немесе сынақ күні",
+    "login.deadlineNote": "Міндетті емес. Күн көрсетілсе, жеке кабинетте оған дейінгі кері санақ пайда болады.",
+    "login.submit": "Бастау",
+    "login.demoLabel": "Демо-кіру",
+    "login.demoNote": "Немесе дайын аккаунтты ашып, өнімді жай ғана қарап шық:",
+    "login.demoStudent": "Оқушы ретінде қарау",
+    "login.demoTeacher": "Мұғалім ретінде қарау",
+    "login.errorName": "Атыңды жаз",
+    "login.errorPassword": "Құпия сөз кемінде 4 таңба",
+    "login.errorHttps": "Тіркелу тек https арқылы жұмыс істейді. Сайтты дискідегі файл емес, сілтеме арқылы аш."
   }
 };
 

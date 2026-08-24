@@ -67,13 +67,13 @@ async function submitForm(event) {
 
   const name = nameInput.value.trim();
   if (name === "") {
-    showError("Введи имя");
+    showError(t("login.errorName", "Введи имя"));
     return;
   }
 
   const password = passInput.value;
   if (password.length < 4) {
-    showError("Пароль от 4 символов");
+    showError(t("login.errorPassword", "Пароль от 4 символов"));
     return;
   }
 
@@ -84,7 +84,7 @@ async function submitForm(event) {
   try {
     passHash = await hashPassword(password);
   } catch (error) {
-    showError("Регистрация работает только по https. Открой сайт по ссылке, а не файлом с диска.");
+    showError(t("login.errorHttps", "Регистрация работает только по https. Открой сайт по ссылке, а не файлом с диска."));
     return;
   }
 
