@@ -110,7 +110,7 @@ function paragraphOnly(sourceRef) {
 function renderHeader() {
   document.getElementById("topic-title").textContent = TOPIC.title;
   document.getElementById("topic-grade").textContent =
-    TOPIC.grade + " " + t("diag.grade", "класс");
+    tFormat("common.gradeLabel", "{n} класс", { n: TOPIC.grade });
   document.getElementById("topic-source").textContent = paragraphOnly(MATERIAL.source_ref);
 }
 

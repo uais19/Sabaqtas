@@ -71,7 +71,7 @@ function createStairRow(topic, isRoot) {
 
   const grade = document.createElement("span");
   grade.className = "stair-grade";
-  grade.textContent = topic.grade + " " + t("diag.grade", "класс");
+  grade.textContent = tFormat("common.gradeLabel", "{n} класс", { n: topic.grade });
 
   const status = document.createElement("span");
   status.className = "stair-status";
@@ -108,7 +108,7 @@ function showQuestion(question) {
   // Название темы и текст вопроса берём по идентификаторам из mock.js:
   // так перевод не зависит от того, как фраза написана по-русски.
   questionTopic.textContent = t("topic." + question.topic_id, question.topic_title) +
-    " · " + question.grade + " " + t("diag.grade", "класс");
+    " · " + tFormat("common.gradeLabel", "{n} класс", { n: question.grade });
   questionText.textContent = t("q." + question.id + ".text", question.text);
 
   answersBox.textContent = ""; // убираем кнопки прошлого вопроса

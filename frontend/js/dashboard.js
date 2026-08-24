@@ -150,7 +150,7 @@ function daysWord(count) {
 function createGradeBadge(grade) {
   const badge = document.createElement("span");
   badge.className = "grade-badge";
-  badge.textContent = grade + " " + t("diag.grade", "класс");
+  badge.textContent = tFormat("common.gradeLabel", "{n} класс", { n: grade });
   return badge;
 }
 
@@ -159,7 +159,8 @@ function createGradeBadge(grade) {
 function renderRootGap() {
   const root = MOCK.progress.root_topic;
   document.getElementById("root-title").textContent =
-    t("topic." + root.id, root.title) + " · " + root.grade + " " + t("diag.grade", "класс");
+    t("topic." + root.id, root.title) + " · " +
+    tFormat("common.gradeLabel", "{n} класс", { n: root.grade });
   document.getElementById("root-source").textContent = paragraphOnly(root.source_ref);
 }
 

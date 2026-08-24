@@ -3,7 +3,8 @@
 
 if (typeof TEACHER_MOCK === "undefined") {
   document.querySelector(".teacher-page").innerHTML =
-    "<p class=\"teacher-error\">Не удалось загрузить данные класса. Обновите страницу.</p>";
+    "<p class=\"teacher-error\">" + t("teacher.error",
+      "Не удалось загрузить данные класса. Обновите страницу.") + "</p>";
 } else {
   renderTeacherPage();
 }
@@ -99,7 +100,8 @@ function createStudentRow(student) {
   topicCell.append(topic, source);
 
   gapGradeCell.className = "gap-grade-cell";
-  gapGradeCell.textContent = student.root_topic.grade + " класс";
+  gapGradeCell.textContent = tFormat("common.gradeLabel", "{n} класс",
+    { n: student.root_topic.grade });
 
   progressBox.className = "progress-box";
   progressBox.append(createProgressBar(student.progress_percent, "bar-accent"));
@@ -160,7 +162,7 @@ function createTopicRow(topic) {
   if (isHot) {
     const caption = document.createElement("span");
     caption.className = "hot-caption";
-    caption.textContent = "объяснить завтра";
+    caption.textContent = t("teacher.explainTomorrow", "объяснить завтра");
     row.classList.add("is-hot");
     title.append(caption);
   }
@@ -172,11 +174,21 @@ function createTopicRow(topic) {
   progressBox.append(percent);
 
   details.className = "class-topic-detail";
-  details.textContent = topic.students_struggling + " " +
-    plural(topic.students_struggling, ["ученик", "ученика", "учеников"]) + " " +
-    plural(topic.students_struggling, ["застрял", "застряли", "застряли"]) +
-    " · в среднем " + topic.avg_hints + " " +
-    plural(topic.avg_hints, ["подсказка", "подсказки", "подсказок"]);
+  // На казахском строка собирается шаблоном: там у существительных нет
+  // отдельных форм для 1, 2-4 и 5+, и согласовывать нечего.
+  const kazakhLine = t("teacher.topicDetails", "");
+  if (kazakhLine) {
+    // Десятичный разделитель: в казахской записи запятая, а не точка
+    const hints = String(topic.avg_hints).replace(".", ",");
+    details.textContent = tFormat("teacher.topicDetails", "",
+      { count: topic.students_struggling, hints: hints });
+  } else {
+    details.textContent = topic.students_struggling + " " +
+      plural(topic.students_struggling, ["ученик", "ученика", "учеников"]) + " " +
+      plural(topic.students_struggling, ["застрял", "застряли", "застряли"]) +
+      " · в среднем " + topic.avg_hints + " " +
+      plural(topic.avg_hints, ["подсказка", "подсказки", "подсказок"]);
+  }
 
   row.append(title);
   if (topic.source_ref) row.append(source);
@@ -194,7 +206,7 @@ function addTopic(event) {
   const source = sourceInput.value.trim();
 
   if (title === "" || source === "") {
-    window.alert("Заполните тему и источник.");
+    window.alert(t("teacher.addError", "Заполните тему и источник."));
     return;
   }
 

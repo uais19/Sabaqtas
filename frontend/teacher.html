@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Панель учителя — Sabaqtas</title>
+  <title data-i18n="teacher.title">Панель учителя — Sabaqtas</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css">
   <!-- Язык интерфейса. Подключается первым: остальные скрипты
@@ -17,44 +17,44 @@
   <header class="site-header teacher-header">
     <div class="container header-inner teacher-header-inner">
       <a class="wordmark" href="index.html"><svg class="wordmark-mark" viewBox="0 0 32 32" width="26" height="26" aria-hidden="true" focusable="false"><rect x="2" y="4" width="18" height="6" rx="2" fill="#00A3C4"/><rect x="6" y="13" width="18" height="6" rx="2" fill="#5BC0D6"/><rect x="10" y="22" width="18" height="6" rx="2" fill="#F5B301"/></svg>Sabaqtas</a>
-      <h1 class="teacher-header-title">Панель учителя · <span id="class-title"></span></h1>
+      <h1 class="teacher-header-title"><span data-i18n="teacher.header">Панель учителя</span> · <span id="class-title"></span></h1>
     </div>
   </header>
 
   <main class="container teacher-page">
     <!-- Сводка помогает быстро увидеть состояние всего класса. -->
-    <section class="teacher-summary" aria-label="Сводка по классу">
+    <section class="teacher-summary" aria-label="Сводка по классу" data-i18n-label="teacher.summaryLabel">
       <div class="tiles">
         <article class="tile">
           <p class="tile-number" id="tile-students"></p>
-          <p class="tile-label">Учеников в классе</p>
+          <p class="tile-label" data-i18n="teacher.students">Учеников в классе</p>
         </article>
         <article class="tile">
           <p class="tile-number" id="tile-closed"></p>
-          <p class="tile-label">Закрыто пробелов</p>
+          <p class="tile-label" data-i18n="teacher.closedGaps">Закрыто пробелов</p>
         </article>
         <article class="tile">
           <p class="tile-number" id="tile-gaveup"></p>
           <!-- Считаем учеников, а не застревания: число должно сходиться
                с плиткой «Учеников в классе». «На этой неделе» убрано —
                недель в данных нет, обещать их значило бы врать. -->
-          <p class="tile-label">Учеников застряло</p>
+          <p class="tile-label" data-i18n="teacher.stuck">Учеников застряло</p>
         </article>
       </div>
     </section>
 
     <section class="teacher-section" aria-labelledby="students-heading">
-      <h2 class="teacher-heading" id="students-heading">Ученики</h2>
+      <h2 class="teacher-heading" id="students-heading" data-i18n="teacher.studentsHeading">Ученики</h2>
       <!-- На телефоне таблица прокручивается внутри этой обёртки. -->
       <div class="table-scroll" tabindex="0">
         <table class="students-table">
           <thead>
             <tr>
-              <th scope="col">Ученик</th>
-              <th scope="col">Корневой пробел</th>
-              <th scope="col">Класс пробела</th>
-              <th scope="col">Прогресс</th>
-              <th scope="col">Застревал раз</th>
+              <th scope="col" data-i18n="teacher.colStudent">Ученик</th>
+              <th scope="col" data-i18n="teacher.colRootGap">Корневой пробел</th>
+              <th scope="col" data-i18n="teacher.colGapGrade">Класс пробела</th>
+              <th scope="col" data-i18n="teacher.colProgress">Прогресс</th>
+              <th scope="col" data-i18n="teacher.colGaveUp">Застревал раз</th>
             </tr>
           </thead>
           <tbody id="students-body"></tbody>
@@ -63,32 +63,32 @@
     </section>
 
     <section class="teacher-section" aria-labelledby="topics-heading">
-      <h2 class="teacher-heading" id="topics-heading">Что западает у класса</h2>
+      <h2 class="teacher-heading" id="topics-heading" data-i18n="teacher.topicsHeading">Что западает у класса</h2>
       <div class="class-topics" id="class-topics"></div>
     </section>
 
     <section class="teacher-section" aria-labelledby="add-topic-heading">
-      <h2 class="teacher-heading" id="add-topic-heading">Добавить тему</h2>
+      <h2 class="teacher-heading" id="add-topic-heading" data-i18n="teacher.addHeading">Добавить тему</h2>
       <form class="add-topic" id="add-topic-form">
         <div class="teacher-form-field teacher-form-field-wide">
-          <label for="add-title">Тема</label>
+          <label for="add-title" data-i18n="teacher.addTopic">Тема</label>
           <input class="add-input" id="add-title" type="text" required>
         </div>
         <div class="teacher-form-field">
-          <label for="add-grade">Класс</label>
+          <label for="add-grade" data-i18n="teacher.addGrade">Класс</label>
           <select class="add-input" id="add-grade">
-            <option value="5">5 класс</option>
-            <option value="6">6 класс</option>
-            <option value="7">7 класс</option>
-            <option value="8">8 класс</option>
-            <option value="9" selected>9 класс</option>
+            <option value="5" data-i18n="common.grade5">5 класс</option>
+            <option value="6" data-i18n="common.grade6">6 класс</option>
+            <option value="7" data-i18n="common.grade7">7 класс</option>
+            <option value="8" data-i18n="common.grade8">8 класс</option>
+            <option value="9" selected data-i18n="common.grade9">9 класс</option>
           </select>
         </div>
         <div class="teacher-form-field teacher-form-field-source">
-          <label for="add-source">Источник (параграф)</label>
-          <input class="add-input" id="add-source" type="text" placeholder="Например: Алгебра, 9 класс, §12" required>
+          <label for="add-source" data-i18n="teacher.addSource">Источник (параграф)</label>
+          <input class="add-input" id="add-source" type="text" placeholder="Например: Алгебра, 9 класс, §12" data-i18n-placeholder="teacher.addSourceHint" required>
         </div>
-        <button class="button button-primary add-submit" type="submit">Добавить</button>
+        <button class="button button-primary add-submit" type="submit" data-i18n="teacher.addSubmit">Добавить</button>
       </form>
     </section>
   </main>
