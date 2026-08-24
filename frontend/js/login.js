@@ -67,7 +67,7 @@ async function submitForm(event) {
 
   const name = nameInput.value.trim();
   if (name === "") {
-    showError(t("login.errorName", "Введи имя"));
+    showError(t("login.errorName", "Введи имя и фамилию"));
     return;
   }
 

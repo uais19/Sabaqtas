@@ -32,7 +32,8 @@ const errorBox = document.getElementById("error");
 const profile = readProfile();
 if (profile && profile.name) {
   const profileLine = document.getElementById("profile-line");
-  profileLine.textContent = profile.name + ", начинаем сверху и спускаемся, пока не найдём пробел";
+  profileLine.textContent = tFormat("diag.profileLineFull",
+    "{name}, начинаем сверху и спускаемся, пока не найдём пробел", { name: profile.name });
   profileLine.classList.remove("is-hidden");
 }
 
@@ -70,14 +71,14 @@ function createStairRow(topic, isRoot) {
 
   const grade = document.createElement("span");
   grade.className = "stair-grade";
-  grade.textContent = topic.grade + " класс";
+  grade.textContent = topic.grade + " " + t("diag.grade", "класс");
 
   const status = document.createElement("span");
   status.className = "stair-status";
-  if (isRoot) status.textContent = "здесь пробел";
-  else if (topic.is_correct === null) status.textContent = "ещё вопрос";
-  else if (topic.is_correct) status.textContent = "✓ понятно";
-  else status.textContent = "✕ не получилось";
+  if (isRoot) status.textContent = t("diag.statusGap", "здесь пробел");
+  else if (topic.is_correct === null) status.textContent = t("diag.statusMore", "ещё вопрос");
+  else if (topic.is_correct) status.textContent = t("diag.statusOk", "✓ понятно");
+  else status.textContent = t("diag.statusFail", "✕ не получилось");
 
   row.append(title, grade, status);
   return row;
@@ -104,17 +105,22 @@ function addChainRow(topic) {
 // Рисуем вопрос и кнопки ответов.
 function showQuestion(question) {
   currentQuestion = question;
-  questionTopic.textContent = question.topic_title + " · " + question.grade + " класс";
-  questionText.textContent = question.text;
+  // Название темы и текст вопроса берём по идентификаторам из mock.js:
+  // так перевод не зависит от того, как фраза написана по-русски.
+  questionTopic.textContent = t("topic." + question.topic_id, question.topic_title) +
+    " · " + question.grade + " " + t("diag.grade", "класс");
+  questionText.textContent = t("q." + question.id + ".text", question.text);
 
   answersBox.textContent = ""; // убираем кнопки прошлого вопроса
 
-  question.options.forEach((option) => {
-    answersBox.append(createAnswerButton(option, false));
+  question.options.forEach((option, index) => {
+    // Ключа может не быть — тогда вернётся русский вариант. Для формул
+    // и чисел это правильно: их переводить не нужно.
+    answersBox.append(createAnswerButton(t("q." + question.id + ".o" + index, option), false));
   });
 
   // Пятая кнопка есть всегда. Бэкенд засчитывает её как неверный ответ.
-  answersBox.append(createAnswerButton("Не знаю", true));
+  answersBox.append(createAnswerButton(t("diag.dontKnow", "Не знаю"), true));
 }
 
 // Кнопка одного варианта ответа.
@@ -185,24 +191,32 @@ function showResult(result) {
 
   // Редкий случай: ученик сразу ответил верно, спускаться было некуда.
   if (root === null) {
-    resultTitle.textContent = "Пробелов не нашли";
-    resultText.textContent = "Ты уверенно держишь тему за свой класс. Начнём с текущей программы.";
+    resultTitle.textContent = t("diag.resultNone", "Пробелов не нашли");
+    resultText.textContent = t("diag.resultNoneText",
+      "Ты уверенно держишь тему за свой класс. Начнём с текущей программы.");
     resultSource.textContent = "";
     return;
   }
 
   // Текст собираем из данных, а не пишем названия тем руками:
   // при другом пробеле страница должна говорить правду.
-  resultTitle.textContent = "Нашли, где ты застрял";
+  resultTitle.textContent = t("diag.resultFound", "Нашли, где ты застрял");
   const firstTopic = result.path[0];
-  const tail = ' за ' + root.grade + ' класс. Пока не закроем её, остальное решать бесполезно.';
+
+  // Названия тем переводим по их идентификаторам, а фразу собираем
+  // шаблоном целиком: в казахском другой порядок слов, и склеить её
+  // плюсами из русских кусков не получится.
+  const rootTitle = t("topic." + root.id, root.title);
 
   if (root.id === firstTopic.topic_id) {
     // Пробел оказался на самой первой теме — противопоставлять нечему.
-    resultText.textContent = 'Начинаем с темы "' + root.title + '"' + tail;
+    resultText.textContent = tFormat("diag.resultOne",
+      'Начинаем с темы "{root}" за {grade} класс. Пока не закроем её, остальное решать бесполезно.',
+      { root: rootTitle, grade: root.grade });
   } else {
-    resultText.textContent =
-      'Начинаем не с темы "' + firstTopic.title + '", а с темы "' + root.title + '"' + tail;
+    resultText.textContent = tFormat("diag.resultTwo",
+      'Начинаем не с темы "{first}", а с темы "{root}" за {grade} класс. Пока не закроем её, остальное решать бесполезно.',
+      { first: t("topic." + firstTopic.topic_id, firstTopic.title), root: rootTitle, grade: root.grade });
   }
 
   // Сверяем самооценку из анкеты с тем, что нашла диагностика — ради этого
@@ -210,17 +224,19 @@ function showResult(result) {
   // до появления поля) — тогда предложения просто не будет.
   const level = profile ? levelLabel(profile.level) : "";
   if (level) {
-    resultText.textContent +=
-      ' Ты оценил подготовку как «' + level + '», а пробел оказался за ' + root.grade + ' класс.';
+    resultText.textContent += tFormat("diag.levelNote",
+      ' Ты оценил подготовку как «{level}», а пробел оказался за {grade} класс.',
+      { level: level, grade: root.grade });
   }
 
-  resultSource.textContent = "источник — " + paragraphOnly(root.source_ref);
+  resultSource.textContent = t("diag.source", "источник — ") + paragraphOnly(root.source_ref);
 }
 
 // --- Запуск и перезапуск -------------------------------------------------
 
 function showError() {
-  errorBox.textContent = "Не удалось загрузить вопрос. Обнови страницу и попробуй ещё раз.";
+  errorBox.textContent = t("diag.error",
+    "Не удалось загрузить вопрос. Обнови страницу и попробуй ещё раз.");
   errorBox.classList.remove("is-hidden");
 }
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Диагностика — Sabaqtas</title>
+  <title data-i18n="diag.title">Диагностика — Sabaqtas</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css">
   <!-- Порядок важен: mock.js готовит данные, profile.js даёт доступ
@@ -31,8 +31,8 @@
     <!-- ===== СОСТОЯНИЕ 1: ВОПРОС ===== -->
     <section id="state-question">
 
-      <h1 class="page-title">Диагностика</h1>
-      <p class="page-subtitle">
+      <h1 class="page-title" data-i18n="diag.heading">Диагностика</h1>
+      <p class="page-subtitle" data-i18n="diag.subtitle">
         Отвечай честно. Если не знаешь — так и скажи, это поможет найти пробел быстрее.
       </p>
       <!-- Личная строка из анкеты. Пустая и скрытая, пока профиля нет. -->
@@ -48,7 +48,7 @@
 
       <!-- Лесенка растёт по мере ответов: ученик видит, как система
            спускается по классам вниз -->
-      <p class="chain-title is-hidden" id="chain-title">Что уже проверили</p>
+      <p class="chain-title is-hidden" id="chain-title" data-i18n="diag.chainTitle">Что уже проверили</p>
       <ol class="stairs" id="chain"></ol>
 
     </section>
@@ -56,7 +56,7 @@
     <!-- ===== СОСТОЯНИЕ 2: РЕЗУЛЬТАТ ===== -->
     <section id="state-result" class="is-hidden">
 
-      <h1 class="page-title">Нашли, где ты застрял</h1>
+      <h1 class="page-title" data-i18n="diag.resultFound">Нашли, где ты застрял</h1>
 
       <ol class="stairs stairs-result" id="result-chain"></ol>
 
@@ -66,9 +66,9 @@
       </div>
 
       <div class="result-actions">
-        <a class="button button-primary" href="dashboard.html">Составить план</a>
-        <a class="button button-secondary" href="chat.html">Спросить ИИ по теме</a>
-        <button class="link-button" type="button" id="restart">Пройти заново</button>
+        <a class="button button-primary" href="dashboard.html" data-i18n="diag.makePlan">Составить план</a>
+        <a class="button button-secondary" href="chat.html" data-i18n="diag.askAi">Спросить ИИ по теме</a>
+        <button class="link-button" type="button" id="restart" data-i18n="diag.restart">Пройти заново</button>
       </div>
 
     </section>
