@@ -102,12 +102,18 @@ a:hover {
 
 .header-nav {
   display: flex;
-  gap: 24px;
+  /* 18, а не 24: на казахском надписи длиннее, и при большем промежутке
+     навигация перестаёт помещаться в строку. На русском разница незаметна. */
+  gap: 18px;
 }
 
 .nav-link {
   /* position: relative нужен для полоски .nav-link.active::after */
   position: relative;
+  /* Пункт меню всегда в одну строку. Без этого длинные казахские надписи
+     ломаются пополам, и шапка выглядит рваной: часть пунктов в строку,
+     часть в две. */
+  white-space: nowrap;
   color: var(--muted);
   font-size: 16px;
   text-decoration: none;
