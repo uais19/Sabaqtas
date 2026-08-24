@@ -86,16 +86,16 @@ function createSpeakButton(getText, getLang) {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "speak-button";
-  button.textContent = "Прослушать";
+  button.textContent = t("speech.listen", "Прослушать");
   // Кнопка состоит из одного слова, но экранному диктору нужно понимать,
   // что именно она озвучит.
-  button.setAttribute("aria-label", "Прослушать текст вслух");
+  button.setAttribute("aria-label", t("speech.listenLabel", "Прослушать текст вслух"));
 
   let speaking = false;
 
   function reset() {
     speaking = false;
-    button.textContent = "Прослушать";
+    button.textContent = t("speech.listen", "Прослушать");
     button.classList.remove("is-speaking");
   }
 
@@ -117,13 +117,13 @@ function createSpeakButton(getText, getLang) {
     if (!hasVoiceFor(lang)) {
       // Честно говорим, что голоса нет, вместо того чтобы прочитать
       // казахский текст русским голосом — это звучит как каша.
-      button.textContent = "Нет голоса для этого языка";
+      button.textContent = t("speech.noVoice", "Нет голоса для этого языка");
       button.disabled = true;
       return;
     }
 
     speaking = true;
-    button.textContent = "Остановить";
+    button.textContent = t("speech.stop", "Остановить");
     button.classList.add("is-speaking");
     speak(text, lang, reset);
   });
